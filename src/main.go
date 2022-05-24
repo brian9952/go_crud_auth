@@ -15,6 +15,6 @@ func main() {
 
     router := mux.NewRouter().StrictSlash(true)
     router.HandleFunc("/create", routes.CreateUser).Methods("POST")
-    router.HandleFunc("/show", routes.ShowUser).Methods("POST")
+    router.HandleFunc("/show", routes.ShowUser).Methods("GET")
     log.Fatal(http.ListenAndServe(":8000", router))
 }

@@ -19,6 +19,12 @@ type idStruct struct {
     Id int `json:"id"`
 }
 
+type editStruct struct {
+    Id int `json:"id"`
+    FirstName string `json:"firstname"`
+    LastName string `json:"lastname"`
+}
+
 func CreateUser(w http.ResponseWriter, r *http.Request){
     var user models.User
     var err error
@@ -66,8 +72,8 @@ func ShowUser(w http.ResponseWriter, r *http.Request){
         log.Default().Fatal("Create user error")
     }
 
+    // parse json byte into the struct
     json.Unmarshal(reqBody, &id)
-    log.Default().Panic(id)
 
     // get db connection
     db, connErr := database.GetDatabaseConnection()
@@ -79,7 +85,6 @@ func ShowUser(w http.ResponseWriter, r *http.Request){
     }
 
     result := db.First(&user, id)
-    log.Default().Panic(user)
 
     if result.Error != nil {
         log.Default().Panic("Error occured while connection to the database")
@@ -87,5 +92,40 @@ func ShowUser(w http.ResponseWriter, r *http.Request){
     }
 
     json.NewEncoder(w).Encode(user)
+}
 
+func EditUser(w http.ResponseWriter, r *http.Request){
+    var user models.User
+    var editParam editStruct
+
+    reqBody, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+        log.Default().Fatal("Edit user error")
+    }
+
+    // parse json
+    json.Unmarshal(reqBody, &editParam)
+
+    // get db conn
+    db, connErr := database.GetDatabaseConnection()
+    if connErr != nil {
+        log.Default().Panic("Error occured")
+    }
+
+    result := db.Model(&user).Where("id = ?", editParam.Id).Updates(
+        models.User{
+            FirstName: editParam.FirstName, 
+            LastName: editParam.LastName,
+        })
+
+    if result.Error != nil {
+        log.Default().Panic("Error occured")
+    }
+
+    message := messageSuccess{
+        "Successfully editing a new user",
+        user.Id,
+    }
+
+    json.NewEncoder(w).Encode(message)
 }
