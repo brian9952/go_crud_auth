@@ -14,6 +14,7 @@ func main() {
     database.AutoMigrateDB()
 
     router := mux.NewRouter().StrictSlash(true)
+    router.HandleFunc("/signup", routes.).Methods("POST")
     router.HandleFunc("/create", routes.CreateUser).Methods("POST")
     router.HandleFunc("/show", routes.ShowUser).Methods("GET")
     router.HandleFunc("/edit", routes.EditUser).Methods("PUT")
