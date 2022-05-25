@@ -15,12 +15,21 @@ type messageSuccess struct {
     Id int `json:"userId"`
 }
 
+type messageStruct struct {
+    Message string `json:"message"`
+}
+
 type idStruct struct {
     Id int `json:"id"`
 }
 
 type editStruct struct {
     Id int `json:"id"`
+    FirstName string `json:"firstname"`
+    LastName string `json:"lastname"`
+}
+
+type userStruct struct {
     FirstName string `json:"firstname"`
     LastName string `json:"lastname"`
 }
@@ -94,6 +103,39 @@ func ShowUser(w http.ResponseWriter, r *http.Request){
     json.NewEncoder(w).Encode(user)
 }
 
+func ShowAllUser(w http.ResponseWriter, r *http.Request){
+    var users[] models.User
+
+    // get db connection
+    db, connErr := database.GetDatabaseConnection()
+    if connErr != nil {
+        log.Default().Panic("Error occured while connecting to the database")
+        w.WriteHeader(http.StatusServiceUnavailable)
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode("Service is unavailable")
+    }
+
+    result := db.Find(&users)
+
+    if result.Error != nil {
+        log.Default().Panic("Error occured while connection to the database")
+        json.NewEncoder(w).Encode("Error occured while showing users")
+    }
+
+    if result.RowsAffected == 0 {
+        message := messageStruct{
+            "Users is empty",
+        }
+        json.NewEncoder(w).Encode(message)
+        return
+    }
+
+    jsonStr, _ := json.Marshal(users)
+
+    w.Write(jsonStr)
+
+}
+
 func EditUser(w http.ResponseWriter, r *http.Request){
     var user models.User
     var editParam editStruct
@@ -124,8 +166,41 @@ func EditUser(w http.ResponseWriter, r *http.Request){
 
     message := messageSuccess{
         "Successfully editing a new user",
-        user.Id,
+        editParam.Id,
     }
 
     json.NewEncoder(w).Encode(message)
+}
+
+func DeleteUser(w http.ResponseWriter, r *http.Request){
+    var user models.User
+    var id idStruct
+
+    reqBody, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+        log.Default().Fatal("Edit user error")
+    }
+
+    // parse json
+    json.Unmarshal(reqBody, &id)
+
+    // get db conn
+    db, connErr := database.GetDatabaseConnection()
+    if connErr != nil {
+        log.Default().Panic("Error occured")
+    }
+
+    result := db.Delete(&user, id)
+
+    if result.Error != nil {
+        log.Default().Panic("Error occured")
+    }
+
+    message := messageSuccess{
+        "Successfully editing a new user",
+        id.Id,
+    }
+
+    json.NewEncoder(w).Encode(message)
+
 }

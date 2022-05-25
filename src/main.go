@@ -16,5 +16,8 @@ func main() {
     router := mux.NewRouter().StrictSlash(true)
     router.HandleFunc("/create", routes.CreateUser).Methods("POST")
     router.HandleFunc("/show", routes.ShowUser).Methods("GET")
+    router.HandleFunc("/edit", routes.EditUser).Methods("PUT")
+    router.HandleFunc("/delete", routes.DeleteUser).Methods("DELETE")
+    router.HandleFunc("/showall", routes.ShowAllUser).Methods("GET")
     log.Fatal(http.ListenAndServe(":8000", router))
 }
