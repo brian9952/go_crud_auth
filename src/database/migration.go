@@ -9,8 +9,7 @@ func AutoMigrateDB() error {
         return connErr
     }
 
-    // migrate user models
-    err := db.AutoMigrate(&models.User{})
-
+    // migrate models
+    err := db.AutoMigrate(&models.User{}, &models.Product{})
     return err
 }

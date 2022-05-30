@@ -1,21 +1,22 @@
 package database
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"time"
+    "fmt"
+    "log"
+    "os"
+    "time"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-)
+    "gorm.io/driver/postgres"
+    "gorm.io/gorm"
+    )
 
 // global variables
 var (
     DBConn *gorm.DB
     )
 
-type Db_Data struct {
+// db connection parameters
+type DbParam struct {
     User string
     Password string
     Db string
@@ -25,9 +26,9 @@ type Db_Data struct {
     Timezone string
 }
 
-// public methods
+// main functions
 
-func (d *Db_Data) Init() *Db_Data{
+func (d *DbParam) InitParams() *DbParam {
     d.User = os.Getenv("POSTGRES_USER")
     d.Password = os.Getenv("POSTGRES_PASSWORD")
     d.Db = os.Getenv("POSTGRES_DB")
@@ -35,8 +36,7 @@ func (d *Db_Data) Init() *Db_Data{
     d.Port = os.Getenv("POSTGRES_PORT")
     d.SSL = os.Getenv("POSTGRES_SSL")
     d.Timezone = os.Getenv("POSTGRES_TIMEZONE")
-
-    return d
+    return d;
 }
 
 func CreateDBConnection() error {
@@ -45,7 +45,7 @@ func CreateDBConnection() error {
     }), &gorm.Config{})
 
     if err != nil {
-        log.Default().Fatal("Error occured while connecting with the database")
+        log.Default().Fatal("Fatal Error: Error occured while connecting with the database")
     } else {
         log.Default().Println("Connected to the database")
     }
@@ -63,8 +63,8 @@ func CreateDBConnection() error {
     // set max amount time a connection may be reused
     sqlDb.SetConnMaxLifetime(time.Hour)
 
-    DBConn = db
-    return err
+    DBConn = db;
+    return err;
 }
 
 func GetDatabaseConnection() (*gorm.DB, error) {
@@ -81,12 +81,11 @@ func GetDatabaseConnection() (*gorm.DB, error) {
     return DBConn, nil
 }
 
-// private methods
+// small functions
 
-func getDSN() string{
-    var d *Db_Data = new(Db_Data)
-    d = d.Init()
+func getDSN() string {
+    var d *DbParam = new(DbParam)
+    d = d.InitParams()
     return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
-        d.Host, d.User, d.Password, d.Db, d.Port, d.SSL, d.Timezone);
+        d.Host, d.User, d.Password, d.Db, d.Port, d.SSL, d.Timezone)
 }
-

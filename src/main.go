@@ -1,24 +1,48 @@
 package main
 
 import (
-	"log"
-	"main/database"
-	"main/routes"
-	"net/http"
+    "log"
+    "net/http"
 
-	"github.com/gorilla/mux"
-)
+    "main/database"
+    "main/models"
+    "main/routes"
+
+    "github.com/gorilla/mux"
+    )
+
+type routers struct {
+    mainRouter *mux.Router
+    authRouter *mux.Router
+    productRouter *mux.Router
+}
+
+func (r *routers) createRouter() {
+    r.mainRouter = mux.NewRouter()
+    r.authRouter = r.mainRouter.PathPrefix("/auth").Subrouter()
+    r.productRouter = r.mainRouter.PathPrefix("/product").Subrouter()
+}
+
+func (r *routers) createFunctions() {
+    // router for authentication functions
+    r.authRouter.HandleFunc("/register").Methods("POST")
+    r.authRouter.HandleFunc("/login").Methods("POST")
+
+    // router for products management
+    r.productRouter.HandleFunc("/create").Methods("POST")
+    r.productRouter.HandleFunc("/update").Methods("PUT")
+    r.productRouter.HandleFunc("/showproduct").Methods("GET")
+    r.productRouter.HandleFunc("/showallproduct").Methods("GET")
+    r.productRouter.HandleFunc("/deleteproduct").Methods("DELETE")
+}
 
 func main() {
-    database.CreateDBConnection()
-    database.AutoMigrateDB()
+    var r_ptr *routers = new(routers)
 
-    router := mux.NewRouter().StrictSlash(true)
-    router.HandleFunc("/signup", routes.).Methods("POST")
-    router.HandleFunc("/create", routes.CreateUser).Methods("POST")
-    router.HandleFunc("/show", routes.ShowUser).Methods("GET")
-    router.HandleFunc("/edit", routes.EditUser).Methods("PUT")
-    router.HandleFunc("/delete", routes.DeleteUser).Methods("DELETE")
-    router.HandleFunc("/showall", routes.ShowAllUser).Methods("GET")
-    log.Fatal(http.ListenAndServe(":8000", router))
+    // create mux router
+    r_ptr.createRouter()
+
+    // create routers
+    r_ptr.createFunctions()
+
 }
