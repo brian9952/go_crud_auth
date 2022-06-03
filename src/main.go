@@ -25,7 +25,7 @@ func (r *routers) createRouter() {
 func (r *routers) createFunctions() {
     // router for authentication functions
     r.authRouter.HandleFunc("/register", routes.RegisterUser).Methods("POST")
-    //r.authRouter.HandleFunc("/login").Methods("POST")
+    r.authRouter.HandleFunc("/login", routes.LoginUser).Methods("POST")
 
     // router for products management
     //r.productRouter.HandleFunc("/create").Methods("POST")

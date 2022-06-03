@@ -126,7 +126,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     }
 
     // check username
-    db.Where("username = ?",loginDetails.Username).First(user)
+    db.Where("username = ?",loginDetails.Username).First(&user)
     if user.Username == "" {
         err = createError("authen", "Username is incorrect")
         w.Header().Set("Content-type", "application/json")
@@ -152,6 +152,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // send response
     token.Username = user.Username
     token.Role = user.Role
     token.Token_string  = tokenStr
