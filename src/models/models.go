@@ -7,7 +7,7 @@ import (
 type User struct {
     UserId int `gorm:"primary_key;auto_increment;not_null" json:"user_id"`
     Username string `json:"username" binding:"required"`
-    HashPassword string `json:"hash_password" binding:"required"`
+    HashPassword string `json:"password" binding:"required"`
     Role string `json:"user_role" binding:"required"`
     CreatedAt int64 `gorm:"autoCreateTime:milli" json:"created_at"`
     UpdateAt int64 `gorm:"autoCreateTime:milli" json:"updated_at"`

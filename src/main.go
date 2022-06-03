@@ -1,15 +1,14 @@
 package main
 
 import (
-    "log"
-    "net/http"
+	"main/database"
+	//"main/models"
+	"log"
+	"main/routes"
+	"net/http"
 
-    "main/database"
-    "main/models"
-    "main/routes"
-
-    "github.com/gorilla/mux"
-    )
+	"github.com/gorilla/mux"
+)
 
 type routers struct {
     mainRouter *mux.Router
@@ -25,19 +24,32 @@ func (r *routers) createRouter() {
 
 func (r *routers) createFunctions() {
     // router for authentication functions
-    r.authRouter.HandleFunc("/register").Methods("POST")
-    r.authRouter.HandleFunc("/login").Methods("POST")
+    r.authRouter.HandleFunc("/register", routes.RegisterUser).Methods("POST")
+    //r.authRouter.HandleFunc("/login").Methods("POST")
 
     // router for products management
-    r.productRouter.HandleFunc("/create").Methods("POST")
-    r.productRouter.HandleFunc("/update").Methods("PUT")
-    r.productRouter.HandleFunc("/showproduct").Methods("GET")
-    r.productRouter.HandleFunc("/showallproduct").Methods("GET")
-    r.productRouter.HandleFunc("/deleteproduct").Methods("DELETE")
+    //r.productRouter.HandleFunc("/create").Methods("POST")
+    //r.productRouter.HandleFunc("/update").Methods("PUT")
+    //r.productRouter.HandleFunc("/showproduct").Methods("GET")
+    //r.productRouter.HandleFunc("/showallproduct").Methods("GET")
+    //r.productRouter.HandleFunc("/deleteproduct").Methods("DELETE")
+}
+
+func (r *routers) serverStart() {
+    log.Default().Println("Server started at http://localhost:8080")
+    err := http.ListenAndServe(":8080", r.mainRouter)
+    if err != nil {
+        log.Default().Println("Failed to start server!")
+        log.Fatal(err)
+    }
 }
 
 func main() {
     var r_ptr *routers = new(routers)
+
+    // create database connection and migrate
+    database.CreateDBConnection()
+    database.AutoMigrateDB()
 
     // create mux router
     r_ptr.createRouter()
@@ -45,4 +57,6 @@ func main() {
     // create routers
     r_ptr.createFunctions()
 
+    // start server
+    r_ptr.serverStart()
 }
