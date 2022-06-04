@@ -27,16 +27,26 @@ func (r *routers) createFunctions() {
     // router for authentication functions
     r.authRouter.HandleFunc("/register", 
         middleware.Logging(routes.RegisterUser)).Methods("POST")
+
     r.authRouter.HandleFunc("/login", 
         middleware.Logging(routes.LoginUser)).Methods("POST")
 
     // router for products management
     r.productRouter.HandleFunc("/create", 
-        middleware.Logging(middleware.IsAuthorized(routes.CreateUser))).Methods("POST")
-    //r.productRouter.HandleFunc("/update").Methods("PUT")
-    //r.productRouter.HandleFunc("/showproduct").Methods("GET")
-    //r.productRouter.HandleFunc("/showallproduct").Methods("GET")
-    //r.productRouter.HandleFunc("/deleteproduct").Methods("DELETE")
+        middleware.Logging(middleware.IsAuthorized(routes.CreateProduct))).Methods("POST")
+
+    r.productRouter.HandleFunc("/show",
+        middleware.Logging(middleware.IsAuthorized(routes.ShowProduct))).Methods("GET")
+
+    r.productRouter.HandleFunc("/update",
+        middleware.Logging(middleware.IsAuthorized(routes.UpdateProduct))).Methods("POST")
+
+    r.productRouter.HandleFunc("/delete",
+        middleware.Logging(middleware.IsAuthorized(routes.DeleteProduct))).Methods("DELETE")
+
+    r.productRouter.HandleFunc("/showall",
+        middleware.Logging(middleware.IsAuthorized(routes.ShowAllProduct))).Methods("GET")
+
 }
 
 func (r *routers) serverStart() {

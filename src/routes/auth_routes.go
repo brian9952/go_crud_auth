@@ -95,6 +95,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     var err *l.Error
     var token Token
 
+    log.Default().Println("Executing route")
+
     // db connection
     db, connErr := database.GetDatabaseConnection()
     if connErr != nil {
@@ -107,7 +109,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // json decoding
     jsonErr := json.NewDecoder(r.Body).Decode(&loginDetails)
     if jsonErr != nil {
-        err = l.CreateError("json_decoding", "Error decoding the data ")
+        err = l.CreateError("json_decoding", "Error decoding the data")
         log.Default().Println(jsonErr)
         w.Header().Set("Content-type", "application/json")
         json.NewEncoder(w).Encode(err)

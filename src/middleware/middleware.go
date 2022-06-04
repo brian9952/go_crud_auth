@@ -69,7 +69,6 @@ func Logging(handler http.HandlerFunc) http.HandlerFunc {
         // print logging
         printLog(logStruct)
 
-        handler.ServeHTTP(w, r)
     })
 }
 
@@ -97,7 +96,7 @@ func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
             return key, nil
         })
 
-        // if error
+        // error handling
         if jwtErr != nil {
             err = l.CreateError("expired_token", "Your token has been expired")
             json.NewEncoder(w).Encode(err)
