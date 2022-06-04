@@ -109,7 +109,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
     }
 
     // update
-    result := db.Model(&product).Where("id = ?", editedProduct.Productid).Updates(
+    result := db.Model(&product).Where("product_id = ?", editedProduct.Productid).Updates(
         models.Product {
             ProductName: editedProduct.ProductName,
             ProductDescription: editedProduct.ProductDesc,
@@ -186,6 +186,6 @@ func ShowAllProduct(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    json.NewEncoder(w).Encode(result)
+    json.NewEncoder(w).Encode(products)
     
 }
