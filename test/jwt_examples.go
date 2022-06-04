@@ -158,12 +158,10 @@ func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
 				r.Header.Set("Role", "admin")
 				handler.ServeHTTP(w, r)
 				return
-
 			} else if claims["role"] == "user" {
 				r.Header.Set("Role", "user")
 				handler.ServeHTTP(w, r)
 				return
-
 			}
 		}
 		var reserr Error

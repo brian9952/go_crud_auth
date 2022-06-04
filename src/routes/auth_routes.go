@@ -5,6 +5,7 @@ import (
 	"log"
 	"main/database"
 	"main/models"
+    l "main/libs"
 	"net/http"
 	"os"
 	"time"
@@ -25,22 +26,10 @@ type LoginDetails struct {
     Password string `json:"password"`
 }
 
-type Error struct {
-    ErrorType string `json:"errortype"`
-    Message string `json:"message"`
-}
-
 type Token struct {
     Username string `json:"username"`
     Role string `json:"role"`
     Token_string string `json:"token"`
-}
-
-func createError(errorType string, message string) *Error {
-    var err *Error = new(Error)
-    err.ErrorType = errorType
-    err.Message = message
-    return err
 }
 
 func generateToken(username string, role string) (string, error) {
@@ -64,12 +53,12 @@ func generateToken(username string, role string) (string, error) {
 
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
     var newUser models.User
-    var err *Error
+    var err *l.Error
 
     // db connection
     db, connErr := database.GetDatabaseConnection()
     if connErr != nil {
-        err = createError("db_conn", "Unable to connect to the database")
+        err = l.CreateError("db_conn", "Unable to connect to the database")
         w.Header().Set("Content-type", "application/json")
         json.NewEncoder(w).Encode(err)
         return
@@ -78,7 +67,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
     // json decoding
     jsonErr := json.NewDecoder(r.Body).Decode(&newUser)
     if jsonErr != nil {
-        err = createError("json_decoding", "Error decoding the data")
+        err = l.CreateError("json_decoding", "Error decoding the data")
         log.Default().Println(jsonErr)
         w.Header().Set("Content-type", "application/json")
         json.NewEncoder(w).Encode(err)
@@ -103,13 +92,13 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 func LoginUser(w http.ResponseWriter, r *http.Request) {
     var loginDetails *LoginDetails = new(LoginDetails)
     var user models.User
-    var err *Error
+    var err *l.Error
     var token Token
 
     // db connection
     db, connErr := database.GetDatabaseConnection()
     if connErr != nil {
-        err = createError("db_conn", "Unable to connect to the database")
+        err = l.CreateError("db_conn", "Unable to connect to the database")
         w.Header().Set("Content-type", "application/json")
         json.NewEncoder(w).Encode(err)
         return
@@ -118,7 +107,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // json decoding
     jsonErr := json.NewDecoder(r.Body).Decode(&loginDetails)
     if jsonErr != nil {
-        err = createError("json_decoding", "Error decoding the data ")
+        err = l.CreateError("json_decoding", "Error decoding the data ")
         log.Default().Println(jsonErr)
         w.Header().Set("Content-type", "application/json")
         json.NewEncoder(w).Encode(err)
@@ -128,7 +117,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // check username
     db.Where("username = ?",loginDetails.Username).First(&user)
     if user.Username == "" {
-        err = createError("authen", "Username is incorrect")
+        err = l.CreateError("authen", "Username is incorrect")
         w.Header().Set("Content-type", "application/json")
         json.NewEncoder(w).Encode(err)
         return
@@ -137,7 +126,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // check password
     pwErr := bcrypt.CompareHashAndPassword([]byte(user.HashPassword), []byte(loginDetails.Password))
     if pwErr != nil {
-        err = createError("authen", "User password is incorrect")
+        err = l.CreateError("authen", "User password is incorrect")
         w.Header().Set("Content-type", "application/json")
         json.NewEncoder(w).Encode(err)
         return
@@ -146,7 +135,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // generate jwt
     tokenStr, tokenErr := generateToken(user.Username, user.Role)
     if tokenErr != nil {
-        err = createError("token_creation", "Failed to generate token")
+        err = l.CreateError("token_creation", "Failed to generate token")
         w.Header().Set("Content-type", "application/json")
         json.NewEncoder(w).Encode(err)
         return

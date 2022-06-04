@@ -1,0 +1,83 @@
+package middleware
+
+import (
+	"encoding/json"
+	"fmt"
+	l "main/libs"
+	"net/http"
+	"os"
+
+	"github.com/dgrijalva/jwt-go"
+)
+
+type Claims struct {
+    authorized string
+    username string
+    role string
+    exp string
+}
+
+type Log struct {
+    datetime string
+    method string
+    url string
+    user string
+}
+
+// logging middleware
+func Logging(handler http.HandlerFunc) http.HandlerFunc {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        var log *Log = new(Log)
+    })
+}
+
+// check if user is authorized
+func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        var err *l.Error 
+
+        w.Header().Set("Content-type", "application/json")
+
+        if r.Header["Token"] == nil {
+            err = l.CreateError("token_404", "Token not found")
+            json.NewEncoder(w).Encode(err)
+            return
+        }
+
+        // get secret key & token
+        var key = []byte(os.Getenv("CRUD_SECRETKEY"))
+
+        // jwt parsing
+        token, jwtErr := jwt.Parse(r.Header["Token"][0], func(token *jwt.Token) (interface{}, error) {
+            if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+                return nil, fmt.Errorf("Error in parsing token")
+            }
+            return key, nil
+        })
+
+        // if error
+        if jwtErr != nil {
+            err = l.CreateError("expired_token", "Your token has been expired")
+            json.NewEncoder(w).Encode(err)
+            return
+        }
+
+        claims, ok := token.Claims.(jwt.MapClaims);
+        if ok && token.Valid {
+            if claims["role"] == "admin" {
+                r.Header.Set("Role", "Admin")
+                handler.ServeHTTP(w, r)
+                return
+            } else if claims["role"] == "user" {
+                r.Header.Set("Role", "User")
+                handler.ServeHTTP(w, r)
+                return
+            }
+        } 
+
+        // not authorized
+        err = l.CreateError("not_authorized", "You are not authorized!")
+        json.NewEncoder(w).Encode(err)
+
+    })
+}

@@ -5,6 +5,7 @@ import (
 	//"main/models"
 	"log"
 	"main/routes"
+    "main/middleware"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -28,7 +29,7 @@ func (r *routers) createFunctions() {
     r.authRouter.HandleFunc("/login", routes.LoginUser).Methods("POST")
 
     // router for products management
-    //r.productRouter.HandleFunc("/create").Methods("POST")
+    r.productRouter.HandleFunc("/create", middleware.IsAuthorized(routes.CreateUser)).Methods("POST")
     //r.productRouter.HandleFunc("/update").Methods("PUT")
     //r.productRouter.HandleFunc("/showproduct").Methods("GET")
     //r.productRouter.HandleFunc("/showallproduct").Methods("GET")
