@@ -1,0 +1,4 @@
+backend microservices:
+    - Admin API
+    - Auth API
+    - Products API
