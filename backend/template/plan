@@ -2,3 +2,11 @@ backend microservices:
     - Admin API
     - Auth API
     - Products API
+
+flow:
+    client => auth middleware => proxy => convert jwt => api
+
+login data:
+{
+    "data": base64 user:password:role pair
+}

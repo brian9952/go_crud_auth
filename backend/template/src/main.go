@@ -55,7 +55,7 @@ func (r *routers) serverStart() {
     credentials := handlers.AllowCredentials()
     headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin", "Content-Type", "Authorization"})
     methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
-    origins := handlers.AllowedOrigins([]string{"http://107.102.183.168:8080"})
+    origins := handlers.AllowedOrigins([]string{"http://107.102.183.168:8081"})
     err := http.ListenAndServe(":8081", handlers.CORS(headers, credentials, methods, origins)(r.mainRouter))
     if err != nil {
         log.Default().Println("Failed to start server!")

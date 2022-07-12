@@ -1,33 +1,35 @@
 package main
 
 import (
+	"log"
+	"main/middleware"
+	"main/proxies"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
+
+	"github.com/gorilla/mux"
 )
 
-func createProxy(host string) (*httputil.ReverseProxy, error) {
-    url, err := url.Parse(host)
-    if err != nil {
-        return nil, err
-    }
+func createRouter() *mux.Router {
+    mainRouter := mux.NewRouter()
+    mainRouter = mainRouter.PathPrefix("/v1/api/auth").Subrouter()
 
-    proxy := httputil.NewSingleHostReverseProxy(url)
+    // login handler
+    mainRouter.HandleFunc("/login", middleware.Logging(proxies.LoginHandler))
 
-    originalDirector := proxy.Director
-    proxy.Director = func(r *http.Request) {
-        originalDirector(r)
-        modifyResponse(r)
-    }
+    // register handler
+    mainRouter.HandleFunc("/register", middleware.Logging(proxies.RegisterHandler))
 
-    proxy.ModifyResponse = modifyResponse()
-    return proxy, nil
-}
-
-func modifyResponse(){
-
+    return mainRouter
 }
 
 func main() {
+    router := createRouter()
 
+    log.Default().Println("Service started at http://107.102.183.168:8081")
+    err := http.ListenAndServe(":8081", router)
+
+    if err != nil {
+        log.Default().Println("Failed to start service")
+        log.Fatal(err)
+    }
 }
