@@ -8,10 +8,15 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+    "os"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/felixge/httpsnoop"
 )
+
+var (
+    this_url = os.Getenv("AUTH_URL")
+    )
 
 type Log struct {
     method string
@@ -44,7 +49,7 @@ func printLog(logStruct *Log) {
 }
 
 func checkIntegrity(claims jwt.MapClaims) bool {
-    url_from := "http://107.102.183.168:8081/v1/api/auth"
+    url_from := "http://107.102.183.168:8081"
     if claims["authorized"] == true && claims["url_from"] == url_from {
         return true
     }
@@ -80,8 +85,9 @@ func Logging(handler http.HandlerFunc) http.HandlerFunc {
 func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         var err *libs.Status
+        tokenStr := r.Header.Get("API-Token")
 
-        if r.Header["API-Token"] == nil {
+        if tokenStr == "" {
             err = libs.CreateErrorMessage("Error: Token not Found")
             json.NewEncoder(w).Encode(err)
             return
@@ -90,7 +96,7 @@ func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
         // get secret key
         var key = []byte(libs.Private_Key)
         
-        token, jwtErr := jwt.Parse(r.Header["API-Token"][0], func(token *jwt.Token) (interface{}, error) {
+        token, jwtErr := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
             if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
                 return nil, fmt.Errorf("Error in parsing token")
             }

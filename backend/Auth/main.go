@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"main/database"
 	"main/middleware"
 	"main/routes"
 	"net/http"
@@ -15,10 +16,10 @@ func createRouter() *mux.Router {
 
     // handlers
     mainRouter.HandleFunc("/login",
-        middleware.Logging(routes.LoginUser))
+        middleware.IsAuthorized(middleware.Logging(routes.LoginUser)))
 
     mainRouter.HandleFunc("/register",
-        middleware.Logging(routes.RegisterUser))
+        middleware.IsAuthorized(middleware.Logging(routes.RegisterUser)))
 
     return mainRouter
 }
@@ -28,8 +29,8 @@ func startServer(r *mux.Router) {
     credentials := handlers.AllowCredentials()
     headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin", "Content-Type", "Authorization"})
     methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
-    //origins := handlers.AllowedOrigins([]string{"http://107.102.183.168:8081"})
-    origins := handlers.AllowedOrigins([]string{"*"})
+    origins := handlers.AllowedOrigins([]string{"http://107.102.183.168:8081"})
+    //origins := handlers.AllowedOrigins([]string{"*"})
     err := http.ListenAndServe(":8082", handlers.CORS(headers, credentials, methods, origins)(r))
 
     // start
@@ -40,6 +41,9 @@ func startServer(r *mux.Router) {
 }
 
 func main() {
+    // database init
+    database.CreateDBConnection()
+
     mainRouter := createRouter()
     startServer(mainRouter)
 }

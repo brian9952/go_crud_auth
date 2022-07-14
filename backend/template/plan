@@ -10,3 +10,8 @@ login data:
 {
     "data": base64 user:password:role pair
 }
+
+register data:
+{
+    "data": base64 user:password:role pair
+}

@@ -14,6 +14,7 @@ import (
 var (
     auth_secret_key = os.Getenv("AUTH_API_SECRET")
     product_secret_key = os.Getenv("PRODUCT_API_SECRET")
+    url_this = os.Getenv("GATEWAY_URL")
     )
 
 func addUrl(u *url.URL, r *http.Request) {
@@ -50,23 +51,59 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         panic("Error when parsing")
     }
 
-    token, _ := generateToken("http://107.102.183.168:8081/v1/api/auth", url_str)
+    token, _ := generateToken(url_this, url_str)
 
     proxy := httputil.ReverseProxy{Director: func(r *http.Request){
         addUrl(url, r)
-        r.Header.Add("api_token", token)
+        r.Header.Add("API-Token", token)
     }}
     proxy.ServeHTTP(w, r)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-    url, err := url.Parse("http://107.102.183.168:8082/register")
+    url_str := "http://107.102.183.168:8082/register"
+    url, err := url.Parse(url_str)
     if err != nil {
         panic("Error when parsing")
     }
 
+    token, _ := generateToken(url_this, url_str)
+
     proxy := httputil.ReverseProxy{Director: func(r *http.Request){
         addUrl(url, r)
+        r.Header.Add("API-Token", token)
+    }}
+    proxy.ServeHTTP(w, r)
+}
+
+func AddProductHandler(w http.ResponseWriter, r *http.Request) {
+    url_str := "http://107.102.183.168:8083/add"
+    url, err := url.Parse(url_str)
+    if err != nil {
+        panic("Error when parsing")
+    }
+
+    token, _ := generateToken(url_this, url_str)
+
+    proxy := httputil.ReverseProxy{Director: func(r *http.Request){
+        addUrl(url, r)
+        r.Header.Add("API-Token", token)
+    }}
+    proxy.ServeHTTP(w, r)
+}
+
+func ShowProductHandler(w http.ResponseWriter, r *http.Request) {
+    url_str := "http://107.102.183.168:8083/show"
+    url, err := url.Parse(url_str)
+    if err != nil {
+        panic("Error when parsing")
+    }
+
+    token, _ := generateToken(url_this, url_str)
+
+    proxy := httputil.ReverseProxy{Director: func(r *http.Request){
+        addUrl(url, r)
+        r.Header.Add("API-Token", token)
     }}
     proxy.ServeHTTP(w, r)
 }
