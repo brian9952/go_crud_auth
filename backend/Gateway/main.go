@@ -35,25 +35,18 @@ func (r *Routers) createProductRouter() {
     r.productRouter.HandleFunc("/show_product", middleware.Logging(proxies.ShowProductHandler))
 }
 
-func createMainRouter() *mux.Router {
-    mainRouter := mux.NewRouter()
-    mainRouter = mainRouter.PathPrefix("/v1/api/auth").Subrouter()
-
-    // login handler
-    mainRouter.HandleFunc("/login", middleware.Logging(proxies.LoginHandler))
-
-    // register handler
-    mainRouter.HandleFunc("/register", middleware.Logging(proxies.RegisterHandler))
-
-
-    return mainRouter
+func (r *Routers) createMainRouter() {
+    r.mainRouter = mux.NewRouter()
 }
 
 func main() {
-    router := createRouter()
+    var router *Routers = new(Routers)
+    router.createMainRouter()
+    router.createAuthRouter()
+    router.createProductRouter()
 
     log.Default().Println("Service started at http://107.102.183.168:8081")
-    err := http.ListenAndServe(":8081", router)
+    err := http.ListenAndServe(":8081", router.mainRouter)
 
     if err != nil {
         log.Default().Println("Failed to start service")
