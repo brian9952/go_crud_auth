@@ -77,7 +77,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddProductHandler(w http.ResponseWriter, r *http.Request) {
-    url_str := "http://107.102.183.168:8083/add"
+    url_str := "http://107.102.183.168:8083/create_product"
     url, err := url.Parse(url_str)
     if err != nil {
         panic("Error when parsing")
@@ -93,7 +93,7 @@ func AddProductHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ShowProductHandler(w http.ResponseWriter, r *http.Request) {
-    url_str := "http://107.102.183.168:8083/show"
+    url_str := "http://107.102.183.168:8083/show_products"
     url, err := url.Parse(url_str)
     if err != nil {
         panic("Error when parsing")

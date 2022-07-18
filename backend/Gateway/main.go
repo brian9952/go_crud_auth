@@ -32,7 +32,7 @@ func (r *Routers) createProductRouter() {
     r.productRouter.HandleFunc("/create_product", middleware.Logging(proxies.AddProductHandler))
 
     // show product handler
-    r.productRouter.HandleFunc("/show_product", middleware.Logging(proxies.ShowProductHandler))
+    r.productRouter.HandleFunc("/show_products", middleware.Logging(proxies.ShowProductHandler))
 }
 
 func (r *Routers) createMainRouter() {
