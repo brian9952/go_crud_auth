@@ -6,6 +6,7 @@ import (
 	"main/middleware"
 	"main/routes"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -25,7 +26,7 @@ func createRouter() *mux.Router {
 }
 
 func startServer(r *mux.Router) {
-    log.Default().Println("Server started at http://localhost:8082")
+    log.Default().Println("Server started at " + os.Getenv("AUTH_URL"))
     credentials := handlers.AllowCredentials()
     headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin", "Content-Type", "Authorization"})
     methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})

@@ -3,9 +3,10 @@ package main
 import (
 	"log"
 	"main/database"
-    "main/middleware"
+	"main/middleware"
 	"main/routes"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -25,7 +26,7 @@ func createRouters() *mux.Router {
 }
 
 func startServer(r *mux.Router)  {
-    log.Default().Println("Server started at http://localhost:8083")
+    log.Default().Println("Service started at " + os.Getenv("PRODUCT_URL"))
     credentials := handlers.AllowCredentials()
     headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin", "Content-Type", "Authorization"})
     methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})

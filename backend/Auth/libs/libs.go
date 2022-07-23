@@ -4,7 +4,10 @@ import (
     "os"
     )
 
-var Private_Key = os.Getenv("AUTH_API_SECRET")
+var (
+    Auth_api_key = os.Getenv("AUTH_API_SECRET")
+    Auth_key = os.Getenv("AUTH_SECRET")
+)
 
 type Status struct {
     StatusType int `json:"status_type"`// -1 error, 0 warning, 1 success

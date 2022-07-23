@@ -12,8 +12,8 @@ import (
 )
 
 var (
-    auth_secret_key = os.Getenv("AUTH_API_SECRET")
-    product_secret_key = os.Getenv("PRODUCT_API_SECRET")
+    auth_api_key = os.Getenv("AUTH_API_SECRET")
+    product_api_key = os.Getenv("PRODUCT_API_SECRET")
     url_this = os.Getenv("GATEWAY_URL")
     )
 
@@ -24,8 +24,7 @@ func addUrl(u *url.URL, r *http.Request) {
     r.Host = u.Path
 }
 
-func generateToken(url_from string, url_to string) (string, error) {
-    var key = []byte(auth_secret_key)
+func generateToken(key []byte, url_from string, url_to string) (string, error) {
 
     token := jwt.New(jwt.SigningMethodHS256)
     claims := token.Claims.(jwt.MapClaims)
@@ -45,13 +44,14 @@ func generateToken(url_from string, url_to string) (string, error) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-    url_str := "http://107.102.183.168:8082/login"
+    url_str := os.Getenv("AUTH_URL") + "login"
     url, err := url.Parse(url_str)
     if err != nil {
         panic("Error when parsing")
     }
 
-    token, _ := generateToken(url_this, url_str)
+    jwt_key := []byte(os.Getenv(auth_api_key))
+    token, _ := generateToken(jwt_key, url_this, url_str)
 
     proxy := httputil.ReverseProxy{Director: func(r *http.Request){
         addUrl(url, r)
@@ -61,13 +61,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-    url_str := "http://107.102.183.168:8082/register"
+    url_str := os.Getenv("AUTH_URL") + "register"
     url, err := url.Parse(url_str)
     if err != nil {
         panic("Error when parsing")
     }
 
-    token, _ := generateToken(url_this, url_str)
+    jwt_key := []byte(os.Getenv(auth_api_key))
+    token, _ := generateToken(jwt_key, url_this, url_str)
 
     proxy := httputil.ReverseProxy{Director: func(r *http.Request){
         addUrl(url, r)
@@ -77,13 +78,14 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddProductHandler(w http.ResponseWriter, r *http.Request) {
-    url_str := "http://107.102.183.168:8083/create_product"
+    url_str := os.Getenv("PRODUCT_URL") + "create_product"
     url, err := url.Parse(url_str)
     if err != nil {
         panic("Error when parsing")
     }
 
-    token, _ := generateToken(url_this, url_str)
+    jwt_key := []byte(os.Getenv(product_api_key))
+    token, _ := generateToken(jwt_key, url_this, url_str)
 
     proxy := httputil.ReverseProxy{Director: func(r *http.Request){
         addUrl(url, r)
@@ -93,13 +95,14 @@ func AddProductHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ShowProductHandler(w http.ResponseWriter, r *http.Request) {
-    url_str := "http://107.102.183.168:8083/show_products"
+    url_str := os.Getenv("PRODUCT_URL") + "show_products"
     url, err := url.Parse(url_str)
     if err != nil {
         panic("Error when parsing")
     }
 
-    token, _ := generateToken(url_this, url_str)
+    jwt_key := []byte(os.Getenv(product_api_key))
+    token, _ := generateToken(jwt_key, url_this, url_str)
 
     proxy := httputil.ReverseProxy{Director: func(r *http.Request){
         addUrl(url, r)

@@ -49,7 +49,7 @@ func printLog(logStruct *Log) {
 }
 
 func checkIntegrity(claims jwt.MapClaims) bool {
-    url_from := "http://107.102.183.168:8081"
+    url_from := os.Getenv("GATEWAY_URL")
     if claims["authorized"] == true && claims["url_from"] == url_from {
         return true
     }
@@ -94,7 +94,7 @@ func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
         }
 
         // get secret key
-        var key = []byte(libs.Private_Key)
+        var key = []byte(libs.Auth_api_key)
         
         token, jwtErr := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
             if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

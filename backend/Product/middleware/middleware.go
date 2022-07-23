@@ -14,10 +14,6 @@ import (
 	"github.com/felixge/httpsnoop"
 )
 
-var (
-    this_url = os.Getenv("PRODUCT_URL")
-    )
-
 type Log struct {
     method string
     uri string
@@ -81,20 +77,30 @@ func checkIntegrity(claims jwt.MapClaims) bool {
     return false
 }
 
+// TODO: check auth api
+
+// TODO: check auth user
+
 // TODO: check auth
 func IsAuthorized(handler http.HandlerFunc) http.HandlerFunc {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         var err *libs.Status
-        tokenStr := r.Header.Get("API-Token")
+        gatewayTokenStr := r.Header.Get("API-Token")
+        authToken := r.Header.Get("Auth-Token")
 
-        if tokenStr == "" {
+
+        if gatewayTokenStr == "" || authToken == "" {
             err = libs.CreateErrorMessage("Error: Token not Found")
             json.NewEncoder(w).Encode(err)
             return
         }
 
-        // get secret key
-        var key = []byte(libs.Private_Key)
+        // get api secret key
+        var apiKey = []byte(libs.Private_Key)
+
+        // get auth secret key
+        var authKey = []byte(libs.)
+
         
         token, jwtErr := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
             if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

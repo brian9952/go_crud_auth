@@ -5,6 +5,7 @@ import (
 	"main/middleware"
 	"main/proxies"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -45,7 +46,7 @@ func main() {
     router.createAuthRouter()
     router.createProductRouter()
 
-    log.Default().Println("Service started at http://107.102.183.168:8081")
+    log.Default().Println("Service started at " + os.Getenv("GATEWAY_URL"))
     err := http.ListenAndServe(":8081", router.mainRouter)
 
     if err != nil {

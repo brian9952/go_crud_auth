@@ -9,17 +9,12 @@ import (
 	"main/libs"
 	"main/models"
 	"net/http"
-	"os"
 	"strings"
     "time"
 
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var (
-    secretkey = os.Getenv("GATEWAY_URL")
-    )
 
 type AuthData struct {
     DataStr string `json:"data"`
@@ -85,7 +80,7 @@ func GetHashPassword(pass string) (string, error){
 }
 
 func generateToken(username string, role string) (string, error) {
-    key := []byte(secretkey)
+    key := []byte(libs.Auth_key)
 
     token := jwt.New(jwt.SigningMethodHS256)
     claims := token.Claims.(jwt.MapClaims)
