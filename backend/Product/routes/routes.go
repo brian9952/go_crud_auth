@@ -1,19 +1,15 @@
 package routes
 
 import (
-	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"main/database"
 	l "main/libs"
 	"main/models"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
-type rawData struct {
-    Data string `json:"data"`
+type idProduct struct {
+    Id int `json:"product_id"`
 }
 
 func ShowProduct(w http.ResponseWriter, r *http.Request) {
@@ -48,30 +44,8 @@ func ShowProduct(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(products)
 }
 
-func processProductRaw(dataStr string) (*models.Product, error) {
-    var newProduct *models.Product
-    decodedStr, err := base64.StdEncoding.DecodeString(dataStr)
-    if err != nil {
-        return nil, err
-    }
-
-    // split string
-    dataArr := strings.Split(string(decodedStr), ":")
-
-    // input product
-    newProduct = new(models.Product)
-    newProduct.ProductName = dataArr[0]
-    newProduct.ProductDescription = dataArr[1]
-    newProduct.ProductValue, err = strconv.Atoi(dataArr[2])
-    if err != nil {
-        return nil, fmt.Errorf("Cannot convert string to int")
-    }
-
-    return newProduct, nil
-}
-
 func CreateProduct(w http.ResponseWriter, r *http.Request) {
-    var rd *rawData
+    var newProduct *models.Product
 
     w.Header().Set("Content-Type", "application/json")
 
@@ -84,17 +58,9 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
     }
 
     // get json data
-    jsonErr := json.NewDecoder(r.Body).Decode(&rd)
+    jsonErr := json.NewDecoder(r.Body).Decode(&newProduct)
     if jsonErr != nil {
         err := l.CreateErrorMessage("Error getting the data")
-        json.NewEncoder(w).Encode(err)
-        return
-    }
-
-    // decrypt base64 data
-    newProduct, processErr := processProductRaw(rd.Data)
-    if processErr != nil {
-        err := l.CreateErrorMessage("Error processing incoming data")
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -103,4 +69,76 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
     db.Create(&newProduct)
 
     json.NewEncoder(w).Encode(l.CreateSuccessMessage("Success inserting the data"))
+}
+
+func EditProduct(w http.ResponseWriter, r *http.Request) {
+    var editedProduct *models.Product
+
+    // db connection
+    db, connErr := database.GetDatabaseConnection()
+    if connErr != nil {
+        err := l.CreateErrorMessage("Unable to connect to the database")
+        json.NewEncoder(w).Encode(err)
+        return
+    }
+
+    // get json data
+    jsonErr := json.NewDecoder(r.Body).Decode(editedProduct)
+    if jsonErr != nil {
+        err := l.CreateErrorMessage("Error getting the data")
+        json.NewEncoder(w).Encode(err)
+        return
+    }
+
+    // update
+    result := db.Model(&editedProduct).Where("product_id = ?", editedProduct.ProductId).Updates(
+        models.Product {
+            ProductName: editedProduct.ProductName,
+            ProductDescription: editedProduct.ProductDescription,
+            ProductValue: editedProduct.ProductValue,
+        })
+
+    if result.Error != nil {
+        err := l.CreateErrorMessage("Error occured while updateing query")
+        json.NewEncoder(w).Encode(err)
+        return 
+    }
+
+    success := l.CreateSuccessMessage("Successfully updating the data")
+    json.NewEncoder(w).Encode(success)
+    return
+}
+
+func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+    var product *models.Product
+    var Id *idProduct
+
+    // db connection
+    db, connErr := database.GetDatabaseConnection()
+    if connErr != nil {
+        err := l.CreateErrorMessage("Unable to connect to the database")
+        json.NewEncoder(w).Encode(err)
+        return
+    }
+
+    // get json data
+    jsonErr := json.NewDecoder(r.Body).Decode(&Id)
+    if jsonErr != nil {
+        err := l.CreateErrorMessage("Error getting the data")
+        json.NewEncoder(w).Encode(err)
+        return
+    }
+
+    // delete product
+    result := db.Delete(product, Id.Id)
+    if result.Error != nil {
+        err := l.CreateErrorMessage("Error deleting the data")
+        json.NewEncoder(w).Encode(err)
+        return
+    }
+
+    // success message
+    success := l.CreateSuccessMessage("Success deleting the data")
+    json.NewEncoder(w).Encode(success)
+    return
 }

@@ -57,7 +57,7 @@ func processBase64Data(dataStr string) (*models.User, error) {
     dataArr := strings.Split(string(decodedStr), ":")
     newUser.Username = dataArr[0]
     newUser.HashPassword = dataArr[1]
-    newUser.Role = dataArr[2]
+    newUser.Role = "user"
 
     return newUser, nil
 }
@@ -80,7 +80,7 @@ func GetHashPassword(pass string) (string, error){
 }
 
 func generateToken(username string, role string) (string, error) {
-    key := []byte(libs.Auth_api_key)
+    key := []byte(libs.Auth_key)
 
     token := jwt.New(jwt.SigningMethodHS256)
     claims := token.Claims.(jwt.MapClaims)
@@ -102,8 +102,6 @@ func generateToken(username string, role string) (string, error) {
 func LoginUser(w http.ResponseWriter, r *http.Request) {
     // change header
     w.Header().Set("Content-Type", "application/json")
-
-    log.Default().Println(r.Header.Get("API-Token"))
 
     // check if authorized
     if r.Header.Get("Authorized") != "1" {

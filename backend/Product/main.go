@@ -25,6 +25,24 @@ func createRouters() *mux.Router {
             ),
         ))
 
+    router.HandleFunc("/edit_product",
+        middleware.Logging(
+            middleware.IsAuthorizedAPI(
+                middleware.IsAuthorizedUser(
+                    routes.EditProduct,
+                    ),
+                ),
+            ))
+
+    router.HandleFunc("/delete_product",
+        middleware.Logging(
+            middleware.IsAuthorizedAPI(
+                middleware.IsAuthorizedUser(
+                    routes.DeleteProduct,
+                    ),
+                ),
+            ))
+
     router.HandleFunc("/show_products",
         middleware.Logging(routes.ShowProduct))
 

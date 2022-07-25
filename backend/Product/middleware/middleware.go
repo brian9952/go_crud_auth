@@ -6,11 +6,13 @@ import (
 	"log"
 	"main/libs"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
-    "github.com/golang-jwt/jwt/v4"
 	"github.com/felixge/httpsnoop"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type Log struct {
@@ -69,7 +71,7 @@ func Logging(handler http.HandlerFunc) http.HandlerFunc {
 }
 
 func checkIntegrity(claims jwt.MapClaims) bool {
-    url_from := "http://107.102.183.168:8081"
+    url_from := os.Getenv("GATEWAY_URL")
     if claims["authorized"] == true && claims["url_from"] == url_from {
         return true
     }
@@ -90,7 +92,6 @@ func IsAuthorizedAPI(handler http.HandlerFunc) http.HandlerFunc {
 
         // get api secret key
         var apiKey = []byte(libs.Gateway_api_key)
-
         
         token, jwtErr := jwt.Parse(gatewayTokenStr, func(token *jwt.Token) (interface{}, error) {
             if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -125,21 +126,26 @@ func IsAuthorizedAPI(handler http.HandlerFunc) http.HandlerFunc {
 func IsAuthorizedUser(handler http.HandlerFunc) http.HandlerFunc {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         var err *libs.Status
-        gatewayTokenStr := r.Header.Get("User-Token")
 
-        if gatewayTokenStr == "" {
+        if r.Header.Get("Authorization") == "" {
+            err = libs.CreateErrorMessage("Error: Token not found")
+            json.NewEncoder(w).Encode(err)
+            return
+        }
+
+        userTokenStr := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
+
+        if userTokenStr == "" {
             err = libs.CreateErrorMessage("Error: Token not Found")
             json.NewEncoder(w).Encode(err)
             return
         }
 
-        log.Default().Println("ERROR IN USER AUTHORIZATION")
-
         // get api secret key
-        var apiKey = []byte(libs.Auth_api_key)
+        var apiKey = []byte(libs.Auth_key)
 
         
-        token, jwtErr := jwt.Parse(gatewayTokenStr, func(token *jwt.Token) (interface{}, error) {
+        token, jwtErr := jwt.Parse(userTokenStr, func(token *jwt.Token) (interface{}, error) {
             if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
                 return nil, fmt.Errorf("Error in parsing token")
             }
@@ -155,7 +161,7 @@ func IsAuthorizedUser(handler http.HandlerFunc) http.HandlerFunc {
 
         claims, ok := token.Claims.(jwt.MapClaims)
         if ok && token.Valid {
-            if checkIntegrity(claims) {
+            if claims["role"] == "user\n" {
                 r.Header.Set("Authorized", "1")
                 handler.ServeHTTP(w, r)
                 return

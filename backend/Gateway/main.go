@@ -29,11 +29,13 @@ func (r *Routers) createAuthRouter() {
 func (r *Routers) createProductRouter() {
     r.productRouter = r.mainRouter.PathPrefix("/v1/api/product").Subrouter()
 
+    r.productRouter.HandleFunc("/([^/]+)", middleware.Logging(proxies.ProductHandler))
+
     // create product handler
-    r.productRouter.HandleFunc("/create_product", middleware.Logging(proxies.AddProductHandler))
+    // r.productRouter.HandleFunc("/create_product", middleware.Logging(proxies.ProductHandler))
 
     // show product handler
-    r.productRouter.HandleFunc("/show_products", middleware.Logging(proxies.ShowProductHandler))
+    // r.productRouter.HandleFunc("/show_products", middleware.Logging(proxies.ProductHandler))
 }
 
 func (r *Routers) createMainRouter() {

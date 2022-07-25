@@ -5,7 +5,7 @@ import (
     )
 
 var (
-    Auth_api_key = os.Getenv("AUTH_SECRET")
+    Auth_key = os.Getenv("AUTH_SECRET")
     Gateway_api_key = os.Getenv("PRODUCT_API_SECRET")
 )
 
