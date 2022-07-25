@@ -50,7 +50,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         panic("Error when parsing")
     }
 
-    jwt_key := []byte(os.Getenv(auth_api_key))
+    jwt_key := []byte(auth_api_key)
     token, _ := generateToken(jwt_key, url_this, url_str)
 
     proxy := httputil.ReverseProxy{Director: func(r *http.Request){
@@ -67,7 +67,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
         panic("Error when parsing")
     }
 
-    jwt_key := []byte(os.Getenv(auth_api_key))
+    jwt_key := []byte(auth_api_key)
     token, _ := generateToken(jwt_key, url_this, url_str)
 
     proxy := httputil.ReverseProxy{Director: func(r *http.Request){
@@ -84,7 +84,7 @@ func AddProductHandler(w http.ResponseWriter, r *http.Request) {
         panic("Error when parsing")
     }
 
-    jwt_key := []byte(os.Getenv(product_api_key))
+    jwt_key := []byte(product_api_key)
     token, _ := generateToken(jwt_key, url_this, url_str)
 
     proxy := httputil.ReverseProxy{Director: func(r *http.Request){
@@ -101,7 +101,7 @@ func ShowProductHandler(w http.ResponseWriter, r *http.Request) {
         panic("Error when parsing")
     }
 
-    jwt_key := []byte(os.Getenv(product_api_key))
+    jwt_key := []byte(product_api_key)
     token, _ := generateToken(jwt_key, url_this, url_str)
 
     proxy := httputil.ReverseProxy{Director: func(r *http.Request){

@@ -6,7 +6,6 @@ import (
 
 var (
     Auth_api_key = os.Getenv("AUTH_API_SECRET")
-    Auth_key = os.Getenv("AUTH_SECRET")
 )
 
 type Status struct {

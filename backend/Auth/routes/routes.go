@@ -80,7 +80,7 @@ func GetHashPassword(pass string) (string, error){
 }
 
 func generateToken(username string, role string) (string, error) {
-    key := []byte(libs.Auth_key)
+    key := []byte(libs.Auth_api_key)
 
     token := jwt.New(jwt.SigningMethodHS256)
     claims := token.Claims.(jwt.MapClaims)

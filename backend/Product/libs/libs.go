@@ -5,7 +5,8 @@ import (
     )
 
 var (
-    Product_api_key = os.Getenv("PRODUCT_API_SECRET")
+    Auth_api_key = os.Getenv("AUTH_SECRET")
+    Gateway_api_key = os.Getenv("PRODUCT_API_SECRET")
 )
 
 type Status struct {
