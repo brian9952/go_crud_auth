@@ -1,18 +1,24 @@
 package routes
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
+	"io/ioutil"
+	"log"
 	"main/database"
 	l "main/libs"
 	"main/models"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type idProduct struct {
     Id int `json:"product_id"`
 }
 
-func ShowProduct(w http.ResponseWriter, r *http.Request) {
+func ShowAllProducts(w http.ResponseWriter, r *http.Request) {
     var products[] models.Product
 
     w.Header().Set("Content-Type", "application/json")
@@ -71,6 +77,17 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(l.CreateSuccessMessage("Success inserting the data"))
 }
 
+func printRawData(inp *io.ReadCloser) string {
+    temp, _ := ioutil.ReadAll(*inp)
+    tempstr := string(bytes.Replace(temp, []byte("\r"), []byte("\r\n"), -1))
+    log.Default().Println(tempstr)
+    return tempstr
+}
+
+type test struct {
+    Test string `json:"test_message"`
+}
+
 func EditProduct(w http.ResponseWriter, r *http.Request) {
     var editedProduct *models.Product
 
@@ -83,7 +100,7 @@ func EditProduct(w http.ResponseWriter, r *http.Request) {
     }
 
     // get json data
-    jsonErr := json.NewDecoder(r.Body).Decode(editedProduct)
+    jsonErr := json.NewDecoder(r.Body).Decode(&editedProduct)
     if jsonErr != nil {
         err := l.CreateErrorMessage("Error getting the data")
         json.NewEncoder(w).Encode(err)
@@ -110,7 +127,6 @@ func EditProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteProduct(w http.ResponseWriter, r *http.Request) {
-    var product *models.Product
     var Id *idProduct
 
     // db connection
@@ -130,7 +146,7 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
     }
 
     // delete product
-    result := db.Delete(product, Id.Id)
+    result := db.Delete(&models.Product{}, Id.Id)
     if result.Error != nil {
         err := l.CreateErrorMessage("Error deleting the data")
         json.NewEncoder(w).Encode(err)
@@ -140,5 +156,33 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
     // success message
     success := l.CreateSuccessMessage("Success deleting the data")
     json.NewEncoder(w).Encode(success)
+    return
+}
+
+func ShowProduct(w http.ResponseWriter, r *http.Request) {
+    var product *models.Product
+
+    // get params
+    params := mux.Vars(r)
+    productId := params["id"]
+
+    // db connection
+    db, connErr := database.GetDatabaseConnection()
+    if connErr != nil {
+        err := l.CreateErrorMessage("Unable to connect to the database")
+        json.NewEncoder(w).Encode(err)
+        return
+    }
+
+    // get result
+    result := db.First(&product, productId)
+    if result.Error != nil {
+        err := l.CreateErrorMessage("Error getting the data")
+        json.NewEncoder(w).Encode(err)
+        return
+    }
+
+    // success message
+    json.NewEncoder(w).Encode(product)
     return
 }

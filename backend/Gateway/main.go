@@ -29,7 +29,7 @@ func (r *Routers) createAuthRouter() {
 func (r *Routers) createProductRouter() {
     r.productRouter = r.mainRouter.PathPrefix("/v1/api/product").Subrouter()
 
-    r.productRouter.PathPrefix("/{url}").HandlerFunc(middleware.Logging(proxies.ProductHandler))
+    r.productRouter.PathPrefix("/").HandlerFunc(middleware.Logging(proxies.ProductHandler))
     //r.productRouter.HandleFunc("/{url:[+]}", middleware.Logging(proxies.ProductHandler))
 
     // create product handler

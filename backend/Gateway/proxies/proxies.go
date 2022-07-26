@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gorilla/mux"
 )
 
 var (
@@ -78,9 +77,31 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
     proxy.ServeHTTP(w, r)
 }
 
+func sliceURL(url string) string {
+    var newStr string
+    var idx int
+    tempStr := "product"
+    // search index
+    for i := 0; i < len(url); i++ {
+        for j := i + len(tempStr); j < len(url); j++ {
+            if url[i:j] == tempStr {
+                idx = j + 1
+            }
+        }
+    }
+
+    // get string
+    newStr = url[idx:len(url)]
+    return newStr
+}
+
 func ProductHandler(w http.ResponseWriter, r *http.Request) {
-    params := mux.Vars(r)
-    url_str := os.Getenv("PRODUCT_URL") + params["url"]
+    // split url string
+    rawUrl := r.URL.Path
+    path := sliceURL(rawUrl)
+
+    // append string
+    url_str := os.Getenv("PRODUCT_URL") + path
     url, err := url.Parse(url_str)
     if err != nil {
         panic("Error when parsing")

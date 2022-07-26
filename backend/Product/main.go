@@ -23,7 +23,7 @@ func createRouters() *mux.Router {
                     routes.CreateProduct,
                 ),
             ),
-        ))
+        )).Methods("POST")
 
     router.HandleFunc("/edit_product",
         middleware.Logging(
@@ -32,7 +32,7 @@ func createRouters() *mux.Router {
                     routes.EditProduct,
                     ),
                 ),
-            ))
+            )).Methods("POST")
 
     router.HandleFunc("/delete_product",
         middleware.Logging(
@@ -41,10 +41,13 @@ func createRouters() *mux.Router {
                     routes.DeleteProduct,
                     ),
                 ),
-            ))
+            )).Methods("POST")
 
     router.HandleFunc("/show_products",
-        middleware.Logging(routes.ShowProduct))
+        middleware.Logging(routes.ShowAllProducts)).Methods("GET")
+
+    router.HandleFunc("/show/{id:[0-9]+}", 
+        middleware.Logging(routes.ShowProduct)).Methods("GET")
 
     return router
 }
