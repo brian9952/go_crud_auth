@@ -44,10 +44,18 @@ func createRouters() *mux.Router {
             )).Methods("POST")
 
     router.HandleFunc("/show_products",
-        middleware.Logging(routes.ShowAllProducts)).Methods("GET")
+        middleware.Logging(
+            middleware.IsAuthorizedAPI(
+                routes.ShowAllProducts,
+                ),
+            )).Methods("GET")
 
     router.HandleFunc("/show/{id:[0-9]+}", 
-        middleware.Logging(routes.ShowProduct)).Methods("GET")
+        middleware.Logging(
+            middleware.IsAuthorizedAPI(
+                routes.ShowProduct,
+                ),
+            )).Methods("GET")
 
     return router
 }

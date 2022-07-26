@@ -80,12 +80,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 func sliceURL(url string) string {
     var newStr string
     var idx int
-    tempStr := "product"
+    tempStr := "product/"
     // search index
     for i := 0; i < len(url); i++ {
         for j := i + len(tempStr); j < len(url); j++ {
             if url[i:j] == tempStr {
-                idx = j + 1
+                idx = j
             }
         }
     }
