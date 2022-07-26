@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/mux"
 )
 
 var (
@@ -78,7 +79,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ProductHandler(w http.ResponseWriter, r *http.Request) {
-    url_str := os.Getenv("PRODUCT_URL")
+    params := mux.Vars(r)
+    url_str := os.Getenv("PRODUCT_URL") + params["url"]
     url, err := url.Parse(url_str)
     if err != nil {
         panic("Error when parsing")
@@ -87,49 +89,9 @@ func ProductHandler(w http.ResponseWriter, r *http.Request) {
     jwt_key := []byte(product_api_key)
     token, _ := generateToken(jwt_key, url_this, url_str)
 
-    proxy := httputil.NewSingleHostReverseProxy(url)
-
-    originalDirector := proxy.Director
-    proxy.Director = func(r *http.Request) {
-        originalDirector(r)
+    proxy := httputil.ReverseProxy{Director: func(r *http.Request){
+        addUrl(url, r)
         r.Header.Add("API-Token", token)
-    }
-    //proxy := httputil.ReverseProxy{Director: func(r *http.Request){
-    //    addUrl(url, r)
-    //    r.Header.Add("API-Token", token)
-    //}}
+    }}
     proxy.ServeHTTP(w, r)
 }
-//func AddProductHandler(w http.ResponseWriter, r *http.Request) {
-//    url_str := os.Getenv("PRODUCT_URL") + "create_product"
-//    url, err := url.Parse(url_str)
-//    if err != nil {
-//        panic("Error when parsing")
-//    }
-//
-//    jwt_key := []byte(product_api_key)
-//    token, _ := generateToken(jwt_key, url_this, url_str)
-//
-//    proxy := httputil.ReverseProxy{Director: func(r *http.Request){
-//        addUrl(url, r)
-//        r.Header.Add("API-Token", token)
-//    }}
-//    proxy.ServeHTTP(w, r)
-//}
-//
-//func ShowProductHandler(w http.ResponseWriter, r *http.Request) {
-//    url_str := os.Getenv("PRODUCT_URL") + "show_products"
-//    url, err := url.Parse(url_str)
-//    if err != nil {
-//        panic("Error when parsing")
-//    }
-//
-//    jwt_key := []byte(product_api_key)
-//    token, _ := generateToken(jwt_key, url_this, url_str)
-//
-//    proxy := httputil.ReverseProxy{Director: func(r *http.Request){
-//        addUrl(url, r)
-//        r.Header.Add("API-Token", token)
-//    }}
-//    proxy.ServeHTTP(w, r)
-//}
