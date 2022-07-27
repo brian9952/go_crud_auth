@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import ProductsManagement from '../views/ProductsManagement.vue'
 import UserLogin from '../views/UserLogin.vue'
+import UserRegister from '../views/UserRegister.vue'
 import PageNotFound from '../views/PageNotFound.vue'
 
 const routes = [
@@ -18,9 +19,14 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
   },
   {
-    path: '/user',
-    name: 'user',
+    path: '/login',
+    name: 'login',
     component: UserLogin
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: UserRegister
   },
   {
     path: "/:pathMatch(.*)*",
