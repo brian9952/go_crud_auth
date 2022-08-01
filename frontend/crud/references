@@ -1,0 +1,17 @@
+- Product Management : '/'
+  - Tables
+    - Flex
+      https://www.primefaces.org/primeflex/setup
+    - Dialog
+      https://www.primefaces.org/primevue/dialog
+    - DataTable
+      https://www.primefaces.org/primevue/datatable/dynamiccolumns
+    - Button
+      https://www.primefaces.org/primevue/button
+    - Toast
+      https://www.primefaces.org/primevue/toast
+
+  - Forms
+    - Login
+    - Register
+    - https://www.primefaces.org/primevue/

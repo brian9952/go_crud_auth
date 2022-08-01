@@ -11,7 +11,6 @@
     "primeflex": "^3.2.1",
     "primeicons": "^5.0.0",
     "primevue": "^3.15.0",
-    "sass": "^1.54.0",
     "vue": "^3.2.37",
     "vue-router": "^4.1.2"
   },
@@ -22,6 +21,8 @@
     "eslint": "^8.5.0",
     "eslint-plugin-vue": "^9.0.0",
     "prettier": "^2.5.1",
-    "vite": "^3.0.1"
+    "sass": "^1.54.0",
+    "sass-loader": "^13.0.2",
+    "vite": "^3.0.4"
   }
 }
