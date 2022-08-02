@@ -1,7 +1,15 @@
 <script setup>
-import ProductManagementTitle from "../components/products/ProductManagementTitle.vue"
+import ProductManagementTopContent from "../components/products/ProductManagementTopContent.vue"
+import ProductManagementMainContent from "../components/products/ProductManagementMainContent.vue"
 </script>
 
 <template>
-  <ProductManagementTitle />
+  <ProductManagementTopContent />
+  <ProductManagementMainContent />
 </template>
+
+<style>
+.body {
+
+  }
+</style>
