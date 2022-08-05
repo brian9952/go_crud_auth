@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
+import PrimeVue from "/node_modules/primevue/config"
 
 import "../node_modules/primeflex/primeflex.scss";
 import "../node_modules/primeicons/primeicons.css";
@@ -9,6 +10,7 @@ import "./assets/fonts.css";
 
 const app = createApp(App);
 
+app.use(PrimeVue);
 app.use(router);
 
 app.mount("#app");

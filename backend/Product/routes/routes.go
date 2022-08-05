@@ -18,6 +18,30 @@ type idProduct struct {
     Id int `json:"product_id"`
 }
 
+type products struct {
+    Num int `json:"num"`
+    ProductName string `json:"product_name"`
+    ProductValue int `json:"product_value"`
+    ProductDescription string `json:"product_description"`
+}
+
+func createShowResp(p *[]models.Product) []*products {
+    var ptr_p = *p
+    var ptr_arr_p []*products
+
+    for i := 0; i < len(ptr_p); i++ {
+        var new_p *products =  new(products)
+        new_p.Num = i + 1;
+        new_p.ProductName = ptr_p[i].ProductName
+        new_p.ProductValue = ptr_p[i].ProductValue
+        new_p.ProductDescription = ptr_p[i].ProductDescription
+
+        ptr_arr_p = append(ptr_arr_p, new_p)
+    }
+    return ptr_arr_p
+
+}
+
 func ShowAllProducts(w http.ResponseWriter, r *http.Request) {
     var products[] models.Product
 
@@ -46,8 +70,10 @@ func ShowAllProducts(w http.ResponseWriter, r *http.Request) {
         return 
     }
 
+    resp := createShowResp(&products);
+
     w.WriteHeader(http.StatusOK)
-    json.NewEncoder(w).Encode(products)
+    json.NewEncoder(w).Encode(resp)
 }
 
 func CreateProduct(w http.ResponseWriter, r *http.Request) {

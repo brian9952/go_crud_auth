@@ -4,7 +4,7 @@ import Button from "/node_modules/primevue/button";
 
 <template>
   <div class="card">
-    <div class="flex pt-3 text-blue-100 align-items-center justify-content-center text-xl font-semibold font-roboto">
+    <div class="flex pt-5 text-blue-100 align-items-center justify-content-center text-xl font-semibold font-roboto">
       Product Management
     </div>
   </div>
