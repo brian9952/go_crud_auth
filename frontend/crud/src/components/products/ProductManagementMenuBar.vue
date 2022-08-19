@@ -10,11 +10,11 @@ import Button from "/node_modules/primevue/button";
     </template>
   
     <template #end>
-        <Button class="mx-2 p-button-text" v-for="item of items" :label="item.label" @click="toggleVisible()" /> 
+      <Button class="mx-2 p-button-text" v-for="item of items" :label="item.label" @click="toggleVisible()" />
     </template>
   </Menubar>
 
-  <LoginDialog :display="isVisible"></LoginDialog>
+  <LoginDialog :display="isVisible" @hide="isVisible = false"></LoginDialog>
 </template>
 
 <script>
@@ -28,19 +28,18 @@ export default {
       return {
         isVisible: false,
         items: [
-          {
-              label: 'Login'
-          },
-          {
-              label: 'Register'
-          }
+          { label: 'Login' },
+          { label: 'Register' }
         ]
       }
     },
     methods: {
       toggleVisible() {
-        this.isVisible = true
-        console.log(this.isVisible)
+        if(this.isVisible == false) {
+          this.isVisible = true
+          return
+        }
+        this.isVisible = false
       }
     }
 }
