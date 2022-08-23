@@ -21,10 +21,10 @@ func (r *Routers) createAuthRouter() {
     r.authRouter = r.mainRouter.PathPrefix("/v1/api/auth").Subrouter()
 
     // login handler
-    r.authRouter.HandleFunc("/login", middleware.Logging(proxies.LoginHandler))
+    r.authRouter.HandleFunc("/login", middleware.Logging(proxies.LoginHandler)).Methods("POST")
 
     // register handler
-    r.authRouter.HandleFunc("/register", middleware.Logging(proxies.RegisterHandler))
+    r.authRouter.HandleFunc("/register", middleware.Logging(proxies.RegisterHandler)).Methods("POST")
 }
 
 func (r *Routers) createProductRouter() {
@@ -55,8 +55,9 @@ func main() {
     credentials := handlers.AllowCredentials()
     headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin", "Content-Type", "Authorization"})
     methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
-    origins := handlers.AllowedOrigins([]string{"http://107.102.183.168:8081"})
-    //origins := handlers.AllowedOrigins([]string{"http://107.102.183.168:8081"})
+    origins := handlers.AllowedOrigins([]string{"http://107.102.183.168:5173"})
+    //origins := handlers.AllowedOrigins([]string{"*"})
+    //err := http.ListenAndServe(":8081", handlers.CORS(headers, credentials, methods)(router.mainRouter))
     err := http.ListenAndServe(":8081", handlers.CORS(headers, credentials, methods, origins)(router.mainRouter))
 
     if err != nil {

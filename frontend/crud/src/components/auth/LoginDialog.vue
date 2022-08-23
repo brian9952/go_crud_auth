@@ -24,8 +24,9 @@ import ProgressSpinner from "/node_modules/primevue/progressspinner";
 
       <!-- buttons -->
       <div class="flex gap-4 mb-6">
-        <Button class="flex-grow-1" label="Submit" @click="onSubmit()" />
+        <Button class="flex-grow-1" :icon="spinner_computed" label="Submit" @click="onSubmit" />
       </div>
+
     </div>
   </Dialog>
 </template>
@@ -41,32 +42,42 @@ export default {
       username_error_show: false,
       password_error_show: false,
       username: '',
-      password: ''
+      password: '',
+
+      spinner_computed: ''
     }
   },
   methods: {
-    checkIntegrity(username, password){
-      if(username == '') {
+    checkIntegrity(){
+      if(this.username == '') {
         this.username_error = "Username field is empty!";
         this.username_error_show = true;
+      }else {
+        this.username_error = '';
       }
 
-      if(password == '') {
+      if(this.password == '') {
         this.password_error = "Password field is empty!";
-        this.password_error_show = false;
+        this.password_error_show = true;
+      }else {
+        this.password_error = '';
       }
 
       if(this.username_error == '' && this.password_error == '') {
+        this.username_error_show = false;
+        this.password_error_show = false;
         return 0;
       }
       return 1;
     },
-    convertBase64(username, password){
-      var rawStr = username + ':' + password + ':' + "user"
-      console.log(rawStr);
+    convertBase64(){
+      var rawStr = this.username + ':' + this.password + ':' + "user"
       return btoa(rawStr)
     },
     postInput(dataStr) {
+      // change login to loading icon
+      this.spinner_computed = "pi pi-spin pi-spinner";
+
       const requestOptions = {
         method: "POST",
         mode: 'cors',
@@ -86,27 +97,54 @@ export default {
             return Promise.reject(error);
           }
 
+          this.processResponse(data);
+          this.insertUserData(data);
+          this.spinner_computed = "";
+
           return data;
+        })
+        .catch(error => {
+          return error;
         });
     },
+    insertUserData(data) {
+      // insert cookies
+      this.$cookie.set('isLoggedIn', 'true', { expires: '10m' })
+      this.$cookie.set('username', data["username"], { expires: '10m' })
+
+      // insert authorization header
+
+    },
+    processResponse(data) {
+      if(data["status_type"] == 1) { // username error
+        this.username_error = "Username is incorrect!";
+        this.username_error_show = true;
+      }else if(data["status_type"] == 2) { // password incorrect
+        this.password_error = "Password is incorrect!";
+        this.password_error_show = true;
+      }else if(data["status_type"] == 3){ // internal error
+        console.log("Internal error")
+      }else if(data["status_type"] == 4){ // input error
+        console.log("User input error")
+      }else{ // all correct
+        console.log(data)
+      }
+    },
     onSubmit() {
-      console.log("Submitted!");
+      console.log("Clicked");
 
       // check user input
-      let integrityStatus = this.checkIntegrity(this.username, this.password);
+      var integrityStatus = this.checkIntegrity();
       if(integrityStatus != 0) {
         return;
       }
+      console.log("HERE")
 
       // convert to base64
-      let b64Str = this.convertBase64(this.username, this.password);
-      console.log(b64Str);
+      var b64Str = this.convertBase64();
 
       // fetch data
-      var response = this.postInput(b64Str);
-
-      // process data
-      console.log(response);
+      this.postInput(b64Str);
 
     },
   }

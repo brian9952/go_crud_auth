@@ -46,7 +46,13 @@ export default {
     },
     methods: {
       fetchData() {
-        fetch("http://107.102.183.168:8081/v1/api/product/show_products")
+        const requestOptions = {
+          method: "GET",
+          mode: 'cors',
+          credentials: 'same-origin',
+          cache: 'no-cache'
+        };
+        fetch("http://107.102.183.168:8081/v1/api/product/show_products", requestOptions)
           .then(async response => {
             const data = await response.json();
 

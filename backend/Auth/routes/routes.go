@@ -10,7 +10,7 @@ import (
 	"main/models"
 	"net/http"
 	"strings"
-    "time"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
@@ -27,16 +27,18 @@ type UserData struct {
 }
 
 type LoginResponse struct {
-    StatusType string `json:"status_type"`
+    StatusType int `json:"status_type"`
+    StatusMessage string `json:"status_message"`
     Username string `json:"username"`
     Role string `json:"role"`
     Token string `json:"token"`
 }
 
-func createLoginResponse(username string, role string, token string) (*LoginResponse) {
+func createLoginResponse(status_type int, status_message string, username string, role string, token string) (*LoginResponse) {
     var lr *LoginResponse = new(LoginResponse)
 
-    lr.StatusType = "1"
+    lr.StatusType = status_type
+    lr.StatusMessage = status_message
     lr.Username = username
     lr.Role = role
     lr.Token = token
@@ -102,6 +104,7 @@ func generateToken(username string, role string) (string, error) {
 func LoginUser(w http.ResponseWriter, r *http.Request) {
     // change header
     w.Header().Set("Content-Type", "application/json")
+    log.Default().Println(w.Header().Get("Access-Control-Allow-Origin"))
 
     // check if authorized
     if r.Header.Get("Authorized") != "1" {
@@ -113,7 +116,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // db conn
     db, connErr := database.GetDatabaseConnection()
     if connErr != nil {
-        err := libs.CreateErrorMessage("Error: Unable to connect to the database")
+        err := createLoginResponse(3, "Server internal error", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -125,7 +128,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // get base64 data
     jsonErr := json.NewDecoder(r.Body).Decode(&data)
     if jsonErr != nil {
-        err := libs.CreateErrorMessage("Error: Decoding the data")
+        err := createLoginResponse(3, "Server internal error", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -133,15 +136,14 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // decode base64
     dataArr, decodeErr := decodeLoginString(data.DataStr)
     if decodeErr != nil {
-        err := libs.CreateErrorMessage("Error: Decoding the data")
+        err := createLoginResponse(4, "User input error", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
     }
 
     // query db
-    db.Where("username = ?",dataArr[0]).First(&user)
-    if user.Username == "" {
-        err := libs.CreateErrorMessage("Error: Username is incorrect")
+    if result := db.Where("username = ?", dataArr[0]).First(&user); result.Error != nil {
+        err := createLoginResponse(1, "Username is incorrect", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -149,7 +151,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // check password
     pwdErr := bcrypt.CompareHashAndPassword([]byte(user.HashPassword), []byte(dataArr[1]))
     if pwdErr != nil {
-        err := libs.CreateErrorMessage("Error: Password is incorrect")
+        err := createLoginResponse(2, "Password is incorrect", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -157,14 +159,14 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // generate jwt
     tokenStr, tokenErr := generateToken(user.Username, user.Role)
     if tokenErr != nil {
-        err := libs.CreateErrorMessage("Error: Something went wrong, contact administrator if you see this message")
+        err := createLoginResponse(3, "Server internal error", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
     }
 
     // send response
     log.Default().Println("Login Success")
-    response := createLoginResponse(user.Username, user.Role, tokenStr)
+    response := createLoginResponse(0, "Login success", user.Username, user.Role, tokenStr)
     json.NewEncoder(w).Encode(response)
     return
 }

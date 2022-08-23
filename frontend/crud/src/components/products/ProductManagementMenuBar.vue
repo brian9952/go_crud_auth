@@ -27,11 +27,21 @@ export default {
     data() {
       return {
         isVisible: false,
+        isLoggedIn: false,
+        username: '',
         items: [
           { label: 'Login' },
           { label: 'Register' }
         ]
       }
+    },
+    mounted() {
+      if(this.$cookie.get('isLoggedIn') == false) {
+        return;
+      }
+
+      console.log("Logged in");
+
     },
     methods: {
       toggleVisible() {
