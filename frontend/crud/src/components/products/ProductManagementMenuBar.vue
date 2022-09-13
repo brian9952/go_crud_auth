@@ -36,9 +36,9 @@ export default {
       }
     },
     mounted() {
-      if(this.$cookie.get('isLoggedIn') == false) {
-        return;
-      }
+      // if(this.$cookie.get('isLoggedIn') == false) {
+      //   return;
+      // }
 
       console.log("Logged in");
 

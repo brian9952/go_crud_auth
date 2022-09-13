@@ -113,6 +113,7 @@ export default {
       this.$cookie.set('username', data["username"], { expires: '10m' })
 
       // insert authorization header
+      http.headers.common['']
 
     },
     processResponse(data) {
