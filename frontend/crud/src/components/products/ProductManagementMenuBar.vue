@@ -40,8 +40,6 @@ export default {
       //   return;
       // }
 
-      console.log("Logged in");
-
     },
     methods: {
       toggleVisible() {

@@ -44,7 +44,7 @@ func generateToken(key []byte, url_from string, url_to string) (string, error) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-    url_str := os.Getenv("AUTH_URL") + "login"
+    url_str := os.Getenv("AUTH_URL") + "/login"
     url, err := url.Parse(url_str)
     if err != nil {
         panic("Error when parsing")
@@ -61,7 +61,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-    url_str := os.Getenv("AUTH_URL") + "register"
+    url_str := os.Getenv("AUTH_URL") + "/register"
     url, err := url.Parse(url_str)
     if err != nil {
         panic("Error when parsing")
@@ -101,7 +101,7 @@ func ProductHandler(w http.ResponseWriter, r *http.Request) {
     path := sliceURL(rawUrl)
 
     // append string
-    url_str := os.Getenv("PRODUCT_URL") + path
+    url_str := os.Getenv("PRODUCT_URL") + "/" + path
     url, err := url.Parse(url_str)
     if err != nil {
         panic("Error when parsing")

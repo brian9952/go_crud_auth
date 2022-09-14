@@ -143,7 +143,6 @@ func IsAuthorizedUser(handler http.HandlerFunc) http.HandlerFunc {
 
         // get api secret key
         var apiKey = []byte(libs.Auth_key)
-
         
         token, jwtErr := jwt.Parse(userTokenStr, func(token *jwt.Token) (interface{}, error) {
             if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -161,7 +160,7 @@ func IsAuthorizedUser(handler http.HandlerFunc) http.HandlerFunc {
 
         claims, ok := token.Claims.(jwt.MapClaims)
         if ok && token.Valid {
-            if claims["role"] == "user\n" {
+            if claims["role"] == "user" {
                 r.Header.Set("Authorized", "1")
                 handler.ServeHTTP(w, r)
                 return

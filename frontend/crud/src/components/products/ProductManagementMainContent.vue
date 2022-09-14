@@ -26,7 +26,7 @@ import axios from 'axios';
   </div>
 
   <!-- dialog -->
-  <ProductDialog :display="isVisible" @hide="isVisible = false" @interface="getChildInterface">
+  <ProductDialog :display="isVisible" @hide="isVisible = false" @closeDialog="isVisible = false"  @interface="getChildInterface">
   </ProductDialog>
 
 </template>
@@ -70,7 +70,8 @@ export default {
     },
     methods: {
       fetchData() {
-        axios.get("http://107.102.183.168:8081/v1/api/product/show_products")
+        let url = import.meta.env.VITE_BACKEND_URL
+        axios.get(url + "/v1/api/product/show_products")
           .then(resp => {
             // get numbering
             for (var i = 0; i < Object.keys(resp.data).length; i++) {

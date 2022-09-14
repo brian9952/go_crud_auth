@@ -1,17 +1,21 @@
 <script setup>
 import Dialog from "/node_modules/primevue/dialog"
+import Button from "/node_modules/primevue/button"
 import axios from "axios"
 </script>
 
 <template>
   <Dialog v-model:visible="display" v-bind:modal="true">
-    <div class="flex flex-column">
-      <h2 class="font-bold">Product Name</h2>
-      <p>{{ product_name }}</p>
-      <h2 class="font-bold">Price</h2>
-      <p>{{ product_value }}</p>
-      <h2 class="font-bold">Description</h2>
-      <p>{{ product_description }}</p>
+    <div class="flex flex-column px-8 pb-4">
+      <h2 class="font-bold">Product Name</h2><br>
+      {{ product_name }}
+      <h2 class="font-bold">Price</h2><br>
+      {{ product_value }}
+      <h2 class="font-bold">Description</h2><br>
+      {{ product_description }}
+    </div>
+    <div class="flex flex-column align-items-center">
+      <Button @click="$emit('closeDialog')">Close</Button>
     </div>
   </Dialog>
 </template>
@@ -20,6 +24,10 @@ import axios from "axios"
   export default {
     props: [
       'display'
+    ],
+    emits: [
+      'closeDialog',
+      'interface'
     ],
     data() {
       return {
@@ -34,7 +42,8 @@ import axios from "axios"
     },
     methods: {
       fetchProduct(productId) {
-        axios.get("http://107.102.183.168:8081/v1/api/product/show/" + productId)
+        let url = import.meta.env.VITE_BACKEND_URL
+        axios.get(url + "/v1/api/product/show/" + productId)
           .then(resp => {
             this.product_name = resp.data.product_name
             this.product_value = resp.data.product_value

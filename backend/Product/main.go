@@ -66,7 +66,8 @@ func startServer(r *mux.Router)  {
     headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin", "Content-Type", "Authorization"})
     methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
     //origins := handlers.AllowedOrigins([]string{"http://107.102.183.168:8083"})
-    origins := handlers.AllowedOrigins([]string{"http://107.102.183.168:8081"})
+    // backup => origins := handlers.AllowedOrigins([]string{"http://107.102.183.168:8081"})
+    origins := handlers.AllowedOrigins([]string{os.Getenv("GATEWAY_URL")})
     err := http.ListenAndServe(":8083", handlers.CORS(headers, credentials, methods, origins)(r))
 
     // start
