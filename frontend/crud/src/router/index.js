@@ -7,7 +7,7 @@ import "../../node_modules/primeflex/primeflex.css";
 
 //axios.defaults.baseURL = 'http://107.102.183.168:5073/v1/api';
 // headers
-axios.defaults.headers.common['Authorization'] = 'woe';
+axios.defaults.headers.common['Authorization'] = '';
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 const router = createRouter({

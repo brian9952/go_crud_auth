@@ -3,6 +3,8 @@ import Dialog from "/node_modules/primevue/dialog";
 import InputText from "/node_modules/primevue/inputtext";
 import Button from "/node_modules/primevue/button";
 import ProgressSpinner from "/node_modules/primevue/progressspinner";
+
+import axios from 'axios';
 </script>
 
 <template>
@@ -24,7 +26,7 @@ import ProgressSpinner from "/node_modules/primevue/progressspinner";
 
       <!-- buttons -->
       <div class="flex gap-4 mb-6">
-        <Button class="flex-grow-1" :icon="spinner_computed" label="Submit" @click="onSubmit" />
+        <Button class="flex-grow-1" :icon="spinner_computed" :label="submit_label" @click="onSubmit" />
       </div>
 
     </div>
@@ -44,7 +46,8 @@ export default {
       username: '',
       password: '',
 
-      spinner_computed: ''
+      spinner_computed: '',
+      submit_label: 'Submit'
     }
   },
   methods: {
@@ -78,61 +81,68 @@ export default {
       // change login to loading icon
       this.spinner_computed = "pi pi-spin pi-spinner";
 
-      const requestOptions = {
-        method: "POST",
-        mode: 'cors',
-        credentials: 'same-origin',
-        cache: 'no-cache',
-        headers: { 
-          "Content-Type": "application/json"
-          },
-        body: JSON.stringify({ data: dataStr })
-      };
-      fetch("http://107.102.183.168:8081/v1/api/auth/login", requestOptions)
-        .then(async response => {
-          const data = await response.json();
+      // get backend url
+      let url = import.meta.env.VITE_BACKEND_URL
 
-          if(!response.ok) {
-            const error = (data && data.message) || response.statusText;
-            return Promise.reject(error);
-          }
-
-          this.processResponse(data);
-          this.insertUserData(data);
-          this.spinner_computed = "";
-
-          return data;
+      // fetch api
+      axios.post(url + "/v1/api/auth/login",{
+          data: dataStr
         })
-        .catch(error => {
-          return error;
+        .then(resp => {
+          if(!this.processResponse(resp.data)){
+            this.changeButton()
+            this.insertUserData(resp.data)
+          }
+        })
+        .catch(function(err) {
+          console.log(err)
         });
+    },
+    changeButton() {
+      this.spinner_computed = '';
+      this.submit_label = 'Login Success';
     },
     insertUserData(data) {
       // insert cookies
-      this.$cookie.set('isLoggedIn', 'true', { expires: '10m' })
-      this.$cookie.set('username', data["username"], { expires: '10m' })
+      this.$cookies.set('isLoggedIn', 'true', { expires: '10m' })
+      this.$cookies.set('username', data["username"], { expires: '10m' })
 
       // insert authorization header
-      http.headers.common['']
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + data["token"]
 
+      // change state
+      this.$store.commit('toggleAuthenticated')
+      this.$store.commit('changeUsername', data["username"])
+
+      // close dialog
+      this.$emit('hide')
     },
     processResponse(data) {
       if(data["status_type"] == 1) { // username error
         this.username_error = "Username is incorrect!";
         this.username_error_show = true;
+        this.spinner_computed = '';
+        return 1;
       }else if(data["status_type"] == 2) { // password incorrect
         this.password_error = "Password is incorrect!";
         this.password_error_show = true;
+        this.spinner_computed = '';
+        return 1;
       }else if(data["status_type"] == 3){ // internal error
         console.log("Internal error")
+        this.spinner_computed = '';
+        return 1;
       }else if(data["status_type"] == 4){ // input error
         console.log("User input error")
-      }else{ // all correct
-        console.log(data)
+        this.spinner_computed = '';
+        return 1;
       }
+      return 0;
     },
     onSubmit() {
       console.log("Clicked");
+      console.log("HERE")
+      this.$store.commit('changeUsername', 'WOOEY')
 
       // check user input
       var integrityStatus = this.checkIntegrity();
@@ -151,11 +161,4 @@ export default {
   }
 }
 
-//export default {
-//  data() {
-//    return {
-//      display: true
-//    }
-//  }
-//}
 </script>

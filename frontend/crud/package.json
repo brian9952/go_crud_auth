@@ -15,7 +15,8 @@
     "vls": "^0.8.1",
     "vue": "^3.2.37",
     "vue-cookies": "^1.8.1",
-    "vue-router": "^4.1.2"
+    "vue-router": "^4.1.2",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.0",
