@@ -31,17 +31,25 @@ type LoginResponse struct {
     StatusMessage string `json:"status_message"`
     Username string `json:"username"`
     Role string `json:"role"`
-    Token string `json:"token"`
+    AccessToken string `json:"access_token"`
+    RefreshToken string `json:"refresh_token"`
 }
 
-func createLoginResponse(status_type int, status_message string, username string, role string, token string) (*LoginResponse) {
+func createLoginResponse(
+    status_type int, 
+    status_message string, 
+    username string, 
+    role string, 
+    access_token string,
+    refresh_token string) (*LoginResponse) {
     var lr *LoginResponse = new(LoginResponse)
 
     lr.StatusType = status_type
     lr.StatusMessage = status_message
     lr.Username = username
     lr.Role = role
-    lr.Token = token
+    lr.AccessToken = access_token
+    lr.RefreshToken = refresh_token
 
     return lr
 }
@@ -81,7 +89,7 @@ func GetHashPassword(pass string) (string, error){
     return string(bytes), err
 }
 
-func generateToken(username string, role string) (string, error) {
+func generateAccessToken(username string, role string) (string, error) {
     key := []byte(libs.Auth_key)
 
     token := jwt.New(jwt.SigningMethodHS256)
@@ -89,6 +97,24 @@ func generateToken(username string, role string) (string, error) {
     claims["authorized"] = true
     claims["username"] = username
     claims["role"] = role
+    claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+
+    tokenString, err := token.SignedString(key)
+    if err != nil {
+        log.Default().Println("Something went wrong")
+        log.Default().Println(err.Error())
+        return "", err
+    }
+
+    return tokenString, nil
+}
+
+func generateRefreshToken() (string, error){
+    key := []byte(libs.Auth_key)
+
+    token := jwt.New(jwt.SigningMethodHS256)
+    claims := token.Claims.(jwt.MapClaims)
+    claims["authorized"] = true
     claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
     tokenString, err := token.SignedString(key)
@@ -157,8 +183,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     }
 
     // generate jwt
-    tokenStr, tokenErr := generateToken(user.Username, user.Role)
-    if tokenErr != nil {
+    accessTokenStr, tokenErr := generateAccessToken(user.Username, user.Role)
+    if accessTokenErr != nil {
         err := createLoginResponse(3, "Server internal error", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
