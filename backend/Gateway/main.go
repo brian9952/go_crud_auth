@@ -19,12 +19,16 @@ type Routers struct {
 
 func (r *Routers) createAuthRouter() {
     r.authRouter = r.mainRouter.PathPrefix("/v1/api/auth").Subrouter()
+    r.authRouter.PathPrefix("/").HandlerFunc(middleware.Logging(proxies.AuthHandler))
 
     // login handler
-    r.authRouter.HandleFunc("/login", middleware.Logging(proxies.LoginHandler)).Methods("POST")
+    //r.authRouter.HandleFunc("/login", middleware.Logging(proxies.LoginHandler)).Methods("POST")
 
-    // register handler
-    r.authRouter.HandleFunc("/register", middleware.Logging(proxies.RegisterHandler)).Methods("POST")
+    //// register handler
+    //r.authRouter.HandleFunc("/register", middleware.Logging(proxies.RegisterHandler)).Methods("POST")
+
+    // refresh token handler
+    //r.authRouter.HandleFunc("/refresh_token", middleware.Logging())
 }
 
 func (r *Routers) createProductRouter() {

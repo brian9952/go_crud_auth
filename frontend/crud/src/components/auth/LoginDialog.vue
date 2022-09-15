@@ -108,7 +108,10 @@ export default {
       this.$cookies.set('username', data["username"], { expires: '10m' })
 
       // insert authorization header
-      axios.defaults.headers.common['Authorization'] = 'Bearer ' + data["token"]
+      let bearerStr = 'Bearer ' + data["access_token"] + ';' + data["refresh_token"]
+      localStorage.setItem("app_token", bearerStr)
+      axios.defaults.headers.common['Authorization'] = bearerStr
+
 
       // change state
       this.$store.commit('toggleAuthenticated')

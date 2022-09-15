@@ -1,6 +1,13 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
 import HelloWorld from "./components/HelloWorld.vue";
+
+import axios from 'axios'
+
+axios.defaults.headers.post['Content-Type'] = 'application/json';
+axios.defaults.headers.common['Authorization'] = localStorage.getItem(
+  'app_token'
+);
 </script>
 
 <template>

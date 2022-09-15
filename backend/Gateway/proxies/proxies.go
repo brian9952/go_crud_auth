@@ -43,44 +43,45 @@ func generateToken(key []byte, url_from string, url_to string) (string, error) {
     return tokenString, nil
 }
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-    url_str := os.Getenv("AUTH_URL") + "/login"
-    url, err := url.Parse(url_str)
-    if err != nil {
-        panic("Error when parsing")
-    }
+//func LoginHandler(w http.ResponseWriter, r *http.Request) {
+//    url_str := os.Getenv("AUTH_URL") + "/login"
+//    url, err := url.Parse(url_str)
+//    if err != nil {
+//        panic("Error when parsing")
+//    }
+//
+//    jwt_key := []byte(auth_api_key)
+//    token, _ := generateToken(jwt_key, url_this, url_str)
+//
+//    proxy := httputil.ReverseProxy{Director: func(r *http.Request){
+//        addUrl(url, r)
+//        r.Header.Add("API-Token", token)
+//    }}
+//    proxy.ServeHTTP(w, r)
+//}
+//
+//func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+//    url_str := os.Getenv("AUTH_URL") + "/register"
+//    url, err := url.Parse(url_str)
+//    if err != nil {
+//        panic("Error when parsing")
+//    }
+//
+//    jwt_key := []byte(auth_api_key)
+//    token, _ := generateToken(jwt_key, url_this, url_str)
+//
+//    proxy := httputil.ReverseProxy{Director: func(r *http.Request){
+//        addUrl(url, r)
+//        r.Header.Add("API-Token", token)
+//    }}
+//    proxy.ServeHTTP(w, r)
+//}
 
-    jwt_key := []byte(auth_api_key)
-    token, _ := generateToken(jwt_key, url_this, url_str)
-
-    proxy := httputil.ReverseProxy{Director: func(r *http.Request){
-        addUrl(url, r)
-        r.Header.Add("API-Token", token)
-    }}
-    proxy.ServeHTTP(w, r)
-}
-
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-    url_str := os.Getenv("AUTH_URL") + "/register"
-    url, err := url.Parse(url_str)
-    if err != nil {
-        panic("Error when parsing")
-    }
-
-    jwt_key := []byte(auth_api_key)
-    token, _ := generateToken(jwt_key, url_this, url_str)
-
-    proxy := httputil.ReverseProxy{Director: func(r *http.Request){
-        addUrl(url, r)
-        r.Header.Add("API-Token", token)
-    }}
-    proxy.ServeHTTP(w, r)
-}
-
-func sliceURL(url string) string {
+func sliceURL(url string, temp_str string) string {
     var newStr string
     var idx int
-    tempStr := "product/"
+    tempStr := temp_str
+    //tempStr := "product/"
     // search index
     for i := 0; i < len(url); i++ {
         for j := i + len(tempStr); j < len(url); j++ {
@@ -95,10 +96,32 @@ func sliceURL(url string) string {
     return newStr
 }
 
+func AuthHandler(w http.ResponseWriter, r *http.Request) {
+    // split url string
+    rawUrl := r.URL.Path
+    path := sliceURL(rawUrl, "auth/")
+
+    // append string
+    url_str := os.Getenv("AUTH_URL") + "/" + path
+    url, err := url.Parse(url_str)
+    if err != nil {
+        panic("Error when parsing")
+    }
+
+    jwt_key := []byte(auth_api_key)
+    token, _ := generateToken(jwt_key, url_this, url_str)
+
+    proxy := httputil.ReverseProxy{Director: func(r *http.Request){
+        addUrl(url, r)
+        r.Header.Add("API-Token", token)
+    }}
+    proxy.ServeHTTP(w, r)
+}
+
 func ProductHandler(w http.ResponseWriter, r *http.Request) {
     // split url string
     rawUrl := r.URL.Path
-    path := sliceURL(rawUrl)
+    path := sliceURL(rawUrl, "product/")
 
     // append string
     url_str := os.Getenv("PRODUCT_URL") + "/" + path

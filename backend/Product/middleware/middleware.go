@@ -160,7 +160,7 @@ func IsAuthorizedUser(handler http.HandlerFunc) http.HandlerFunc {
 
         claims, ok := token.Claims.(jwt.MapClaims)
         if ok && token.Valid {
-            if claims["role"] == "user" {
+            if claims["role"] == "user\n" {
                 r.Header.Set("Authorized", "1")
                 handler.ServeHTTP(w, r)
                 return

@@ -26,6 +26,10 @@ type UserData struct {
     Role string `json:"user_role"`
 }
 
+type RefreshTokenData struct {
+    RefreshToken string `json:"refresh_token"`
+}
+
 type LoginResponse struct {
     StatusType int `json:"status_type"`
     StatusMessage string `json:"status_message"`
@@ -89,12 +93,12 @@ func GetHashPassword(pass string) (string, error){
     return string(bytes), err
 }
 
-func generateAccessToken(username string, role string) (string, error) {
+func generateAccessToken(user_id int, username string, role string) (string, error) {
     key := []byte(libs.Auth_key)
 
     token := jwt.New(jwt.SigningMethodHS256)
     claims := token.Claims.(jwt.MapClaims)
-    claims["authorized"] = true
+    claims["user_id"] = user_id
     claims["username"] = username
     claims["role"] = role
     claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
@@ -109,12 +113,12 @@ func generateAccessToken(username string, role string) (string, error) {
     return tokenString, nil
 }
 
-func generateRefreshToken() (string, error){
+func generateRefreshToken(user_id int) (string, error){
     key := []byte(libs.Auth_key)
 
     token := jwt.New(jwt.SigningMethodHS256)
     claims := token.Claims.(jwt.MapClaims)
-    claims["authorized"] = true
+    claims["user_id"] = user_id
     claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
     tokenString, err := token.SignedString(key)
@@ -142,7 +146,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // db conn
     db, connErr := database.GetDatabaseConnection()
     if connErr != nil {
-        err := createLoginResponse(3, "Server internal error", "", "", "")
+        err := createLoginResponse(3, "Server internal error",  "", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -154,7 +158,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // get base64 data
     jsonErr := json.NewDecoder(r.Body).Decode(&data)
     if jsonErr != nil {
-        err := createLoginResponse(3, "Server internal error", "", "", "")
+        err := createLoginResponse(3, "Server internal error", "", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -162,14 +166,14 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // decode base64
     dataArr, decodeErr := decodeLoginString(data.DataStr)
     if decodeErr != nil {
-        err := createLoginResponse(4, "User input error", "", "", "")
+        err := createLoginResponse(4, "Server internal error", "", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
     }
 
     // query db
     if result := db.Where("username = ?", dataArr[0]).First(&user); result.Error != nil {
-        err := createLoginResponse(1, "Username is incorrect", "", "", "")
+        err := createLoginResponse(1, "Username is incorrect", "", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -177,22 +181,29 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
     // check password
     pwdErr := bcrypt.CompareHashAndPassword([]byte(user.HashPassword), []byte(dataArr[1]))
     if pwdErr != nil {
-        err := createLoginResponse(2, "Password is incorrect", "", "", "")
+        err := createLoginResponse(2, "Password is incorrect", "", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
     }
 
-    // generate jwt
-    accessTokenStr, tokenErr := generateAccessToken(user.Username, user.Role)
+    // generate access and refresh token
+    accessTokenStr, accessTokenErr := generateAccessToken(user.UserId, user.Username, user.Role)
     if accessTokenErr != nil {
-        err := createLoginResponse(3, "Server internal error", "", "", "")
+        err := createLoginResponse(3, "Server internal error", "", "", "", "")
         json.NewEncoder(w).Encode(err)
         return
+    }
+
+    refreshTokenStr, refreshTokenErr := generateRefreshToken(user.UserId)
+    if refreshTokenErr != nil {
+        err := createLoginResponse(3, "Server internal error", "", "", "", "")
+        json.NewEncoder(w).Encode(err)
+        return 
     }
 
     // send response
     log.Default().Println("Login Success")
-    response := createLoginResponse(0, "Login success", user.Username, user.Role, tokenStr)
+    response := createLoginResponse(0, "Login success", user.Username, user.Role, accessTokenStr, refreshTokenStr)
     json.NewEncoder(w).Encode(response)
     return
 }
@@ -251,3 +262,88 @@ func RegisterUser(w http.ResponseWriter, r *http.Request){
     return
 }
 
+func RefreshTokenUser(w http.ResponseWriter, r *http.Request) {
+    if r.Header.Get("Authorized") != "1" {
+        err := libs.CreateErrorMessage("Error: You are not authorized")
+        json.NewEncoder(w).Encode(err)
+        return
+    }
+
+    log.Default().Println(r.Header.Get("Authorization"))
+    
+    // db conn
+    db, connErr := database.GetDatabaseConnection()
+    if connErr != nil {
+        err := createLoginResponse(3, "Server internal error", "", "", "", "")
+        json.NewEncoder(w).Encode(err)
+        return
+    }
+
+    // init pointer
+    var user *models.User
+
+    // get token data
+    //jsonErr := json.NewDecoder(r.Body).Decode(&data)
+    //if jsonErr != nil {
+    //    err := createLoginResponse(3, "Server internal error", "", "", "", "")
+    //    json.NewEncoder(w).Encode(err)
+    //    return
+    //}
+    bearer := r.Header.Get("Authorization")
+    refreshToken := strings.Split(bearer, ";")[1]
+
+    // get secret key and authorize
+    var secret_key = []byte(libs.Auth_key)
+
+    token, jwtErr := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+            return nil, fmt.Errorf("Error in parsing token")
+        }
+        return secret_key, nil
+    })
+
+    // error handling
+    if jwtErr != nil {
+        err := libs.CreateErrorMessage("Error: User token is invalid")
+        json.NewEncoder(w).Encode(err)
+        return
+    }
+
+    // check ok
+    claims, ok := token.Claims.(jwt.MapClaims)
+    if ok && token.Valid {
+        // query db
+        if result := db.Where("user_id = ?", claims["user_id"]).First(&user); result.Error != nil {
+            err := createLoginResponse(3, "Server internal error", "", "", "", "")
+            json.NewEncoder(w).Encode(err)
+            return
+        }
+        
+        // create new access token
+        accessToken, accessTokenErr := generateAccessToken(user.UserId, user.Username, user.Role)
+        if accessTokenErr != nil {
+            err := createLoginResponse(3, "Server internal error", "", "", "", "")
+            json.NewEncoder(w).Encode(err)
+            return
+        }
+        
+        // create new refresh token
+        refreshToken, refreshTokenErr := generateRefreshToken(user.UserId)
+        if refreshTokenErr != nil {
+            err := createLoginResponse(3, "Server internal error", "", "", "", "")
+            json.NewEncoder(w).Encode(err)
+            return
+        }
+
+        // send response with new tokens
+        response := createLoginResponse(0, "Refresh Success", user.Username, user.Role, accessToken, refreshToken)
+        json.NewEncoder(w).Encode(response)
+
+    } else {
+        // token invalid
+        err := createLoginResponse(2, "Error: Token Invalid", "", "", "", "")
+        json.NewEncoder(w).Encode(err)
+
+    }
+    return
+}

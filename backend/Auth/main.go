@@ -22,6 +22,9 @@ func createRouter() *mux.Router {
     mainRouter.HandleFunc("/register",
         middleware.IsAuthorized(middleware.Logging(routes.RegisterUser)))
 
+    mainRouter.HandleFunc("/refresh_token",
+        middleware.IsAuthorized(middleware.Logging(routes.RefreshTokenUser)))
+
     return mainRouter
 }
 
