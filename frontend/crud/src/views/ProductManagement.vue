@@ -8,27 +8,38 @@ import axios from 'axios'
 </script>
 
 <template>
-  <ProductManagementMenuBar :isAuthenticated="isAuthenticated"/>
+  <ProductManagementMenuBar @interface="getChildInterface"/>
   <ProductManagementTopContent />
   <ProductManagementMainContent />
 </template>
 
 <script>
 export default {
+    //data() {
+    //  return {
+    //    isCalculated: 0
+    //  }
+    //},
+    components: {
+      ProductManagementMenuBar
+    },
+    childInterface: {
+      showRes: () => {}
+    },
     created() {
-      this.$watch (
-        () => this.$route.params,
-        () => {
-          this.authenticate();
-        },
-
-        { immediate: true }
-      )
+      const fetchData = async() => {
+        this.authenticate()
+      }
+      fetchData();
     },
     methods: {
       authenticate() {
         // get local storage 
-        axios.defaults.headers.common['Authorization'] = localStorage.getItem('app_token')
+        if(localStorage.getItem('app_token') == null) {
+          axios.defaults.headers.common['Authorization'] = "";
+        }else {
+          axios.defaults.headers.common['Authorization'] = localStorage.getItem('app_token')
+        }
 
         // get url
         let url = import.meta.env.VITE_BACKEND_URL
@@ -36,15 +47,23 @@ export default {
         // fetch data
         axios.get(url + "/v1/api/auth/refresh_token")
           .then(resp => {
-            if(resp.data["status_type"] == 0) {
-              this.$store.commit('toggleAuthenticated')
-              this.$store.commit('changeUsername', data["username"])
+            console.log(resp.data.status_type)
+            if(resp.data.status_type == 0) {
+              this.$store.state.isAuthenticated = true
+              //this.$store.commit('toggleAuthenticated', true)
+              this.$store.commit('changeUsername', resp.data.username)
+              //console.log(this.$store.state.isAuthenticated)
+              this.$options.childInterface.showRes()
               return
             }
+            this.$options.childInterface.showRes()
           })
           .catch(function(error) {
-            console.log(error.toJSON())
+            console.log(error)
           })
+      },
+      getChildInterface(childInterface) {
+        this.$options.childInterface = childInterface;
       }
     }
 }

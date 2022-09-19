@@ -269,7 +269,11 @@ func RefreshTokenUser(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    log.Default().Println(r.Header.Get("Authorization"))
+    if r.Header.Get("Authorization") == "" { // bearer is empty
+        resp := createLoginResponse(2, "Token not found", "", "", "", "")
+        json.NewEncoder(w).Encode(resp)
+        return
+    }
     
     // db conn
     db, connErr := database.GetDatabaseConnection()

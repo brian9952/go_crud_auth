@@ -21,13 +21,17 @@ const store = createStore({
       isAuthenticated: false
     }
   },
+  getters: {
+    authenticated: state => {
+      return state.isAuthenticated
+    },
+    getUsername: state => {
+      return state.username
+    }
+  },
   mutations: {
-    toggleAuthenticated(state) {
-      if (state.isAuthenticated == false) {
-        state.isAuthenticated = true
-        return
-      }
-      state.isAuthenticated = false
+    toggleAuthenticated(state, arg) {
+      state.isAuthenticated = arg
     },
     changeUsername(state, username) {
       state.username = username
