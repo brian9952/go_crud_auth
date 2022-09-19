@@ -11,15 +11,19 @@ import axios from 'axios';
   <Dialog v-model:visible="display" v-bind:modal="true">
     <div class="flex flex-column mx-8">
       <h2 class="flex">Log In</h2>
+      <!-- message -->
+      <div class="flex card-container bg-green-500 p-2 my-2 border-round">
+        {{ message }}
+      </div>
       <!-- forms -->
       <label class="flex mb-2" for="Username">Username</label>
-      <InputText type="text" v-model="username" class="flex w-20rem" />
+      <InputText type="text" v-model="username" class="flex w-20rem" :class="username_class" />
       <div class="mb-4">
         <p v-show="username_error_show">{{ username_error }}</p>
       </div>
 
       <label class="flex mb-2" for="Password">Password</label>
-      <InputText type="password" v-model="password" class="flex w-20rem" />
+      <InputText type="password" v-model="password" class="flex w-20rem" :class="password_class" />
       <div class="mb-5">
         <p v-show="password_error_show">{{ password_error }}</p>
       </div>
@@ -45,6 +49,10 @@ export default {
       password_error_show: false,
       username: '',
       password: '',
+
+      // input text state
+      username_class: '',
+      password_class: '',
 
       spinner_computed: '',
       submit_label: 'Submit'
@@ -114,7 +122,7 @@ export default {
 
 
       // change state
-      this.$store.commit('toggleAuthenticated')
+      this.$store.commit('toggleAuthenticated', 1)
       this.$store.commit('changeUsername', data["username"])
 
       // close dialog
@@ -124,11 +132,13 @@ export default {
       if(data["status_type"] == 1) { // username error
         this.username_error = "Username is incorrect!";
         this.username_error_show = true;
+        this.username_class = 'p-invalid'
         this.spinner_computed = '';
         return 1;
       }else if(data["status_type"] == 2) { // password incorrect
         this.password_error = "Password is incorrect!";
         this.password_error_show = true;
+        this.password_class = 'p-invalid'
         this.spinner_computed = '';
         return 1;
       }else if(data["status_type"] == 3){ // internal error
@@ -159,8 +169,10 @@ export default {
 
       // fetch data
       this.postInput(b64Str);
-
     },
+    clearInput() {
+      
+    }
   }
 }
 

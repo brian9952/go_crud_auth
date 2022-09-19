@@ -18,7 +18,11 @@ import axios from 'axios';
         <!-- <Column v-for="col of columns" :field="col.field" :header="col.header" :key="col.field"></Column> -->
         <Column>
           <template #body="buttonProps">
-            <Button class="p-button-warning" @click="fetchProduct(buttonProps.data.product_id)">Show</Button>
+            <div class="flex justify-content-center flex-wrap gap-3">
+              <Button class="flex align-items-center justify-content-center p-button-warning" @click="fetchProduct(buttonProps.data.product_id)">Show</Button>
+              <Button class="flex align-items-center justify-content-center p-button-info" v-if="checkAuth" @click="editProduct(buttonProps.data.product_id)">Edit</Button>
+              <Button class="flex align-items-center justify-content-center p-button-danger" v-if="checkAuth" @click="deleteProduct(buttonProps.data.product_id)">Delete</Button>
+            </div>
           </template>
         </Column>
       </DataTable>
@@ -48,6 +52,14 @@ export default {
         errorMessage: null,
         isVisible: false
         }
+    },
+    computed :{
+      checkAuth() {
+        if (this.$store.getters.authenticated) {
+          return true
+        }
+        return false
+      }
     },
     created() {
       this.columns = [
