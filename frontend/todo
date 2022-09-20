@@ -1,3 +1,2 @@
-- frontend
-  change error message on login page
-
+frontend:
+  - Create edit & delete feature

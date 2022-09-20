@@ -17,9 +17,9 @@ import Skeleton from "/node_modules/primevue/skeleton";
       <div v-show="button_show">
         <div v-if="authShow" id="auth">
           <!-- login button -->
-          <Button class="mx-2 p-button-text" label="Login" @click="toggleVisible()" />
+          <Button class="mx-2 p-button-text" label="Login" @click="openLoginDialog()" />
           <!-- register button -->
-          <Button class="mx-2 p-button-text" label="Register" />
+          <Button class="mx-2 p-button-text" label="Register" @click="openRegisterDialog()" />
         </div>
         <div v-if="welcomeShow" id="loggedin">
           <Button class="mx-2 p-button-text">Welcome {{ this.$store.getters.getUsername }}</Button>
@@ -33,22 +33,26 @@ import Skeleton from "/node_modules/primevue/skeleton";
     </template>
   </Menubar>
 
-  <LoginDialog :display="isVisible" @hide="isVisible = false"></LoginDialog>
+  <LoginDialog :display="loginVisible" @hide="loginVisible = false"></LoginDialog>
+  <RegisterDialog :display="registerVisible" @hide="registerVisible = false"></RegisterDialog>
 </template>
 <script>
 import axios from 'axios';
 import LoginDialog from "../auth/LoginDialog.vue";
+import RegisterDialog from "../auth/RegisterDialog.vue";
 
 export default {
     components: {
-      LoginDialog
+      LoginDialog,
+      RegisterDialog
     },
     emits: [
       'interface'
     ],
     data() {
       return {
-        isVisible: false,
+        loginVisible: false,
+        registerVisible: false,
         skeleton_show: true,
         button_show: false,
         username: '',
@@ -80,12 +84,19 @@ export default {
       this.emitInterface()
     },
     methods: {
-      toggleVisible() {
-        if(this.isVisible == false) {
-          this.isVisible = true
+      openLoginDialog() {
+        if(this.loginVisible == false) {
+          this.loginVisible = true
           return
         }
-        this.isVisible = false
+        this.loginVisible = false
+      },
+      openRegisterDialog() {
+        if(this.registerVisible == false) {
+          this.registerVisible = true
+          return 
+        }
+        this.registerVisible = false
       },
       getUsername() {
         return this.$store.getters.getUsername

@@ -106,12 +106,18 @@ export default {
         this.$options.childInterface = childInterface;
       },
       
-      // show product through interface
+      // interface communcation
+      // show product
       fetchProduct(productId) {
         if(this.isVisible == false) {
           this.isVisible = true;
         }
         this.$options.childInterface.fetchProduct(productId);
+      },
+
+      // edit product
+      editProduct(productId) {
+
       }
     }
   }

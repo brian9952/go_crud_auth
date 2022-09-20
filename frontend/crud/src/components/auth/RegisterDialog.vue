@@ -1,0 +1,131 @@
+<script setup>
+import Dialog from "/node_modules/primevue/dialog";
+import InputText from "/node_modules/primevue/inputtext";
+import Button from "/node_modules/primevue/button";
+import ProgressSpinner from "/node_modules/primevue/progressspinner";
+
+import axios from 'axios';
+</script>
+
+<template>
+  <Dialog v-model:visible="display" v-bind:modal="true">
+    <div class="flex flex-column mx-8">
+      <h2 class="flex">Register User</h2>
+      <!-- message -->
+      <div v-if="message_show" class="flex card-container p-2 mt-2 mb-4 border-round" :class="message_color">
+        {{ message }}
+      </div>
+      <!-- forms -->
+      <label class="flex mb-2" for="Username">Username</label>
+      <InputText type="text" v-model="username" class="flex w-20rem mb-4" :class="username_class" />
+
+      <label class="flex mb-2" for="Password">Password</label>
+      <InputText type="password" v-model="password" class="flex w-20rem mb-4" :class="password_class" />
+
+      <!-- buttons -->
+      <div class="flex gap-4 mb-6">
+        <Button class="flex-grow-1" :icon="spinner_computed" :label="submit_label" @click="onSubmit" />
+      </div>
+
+    </div>
+  </Dialog>
+</template>
+
+<script>
+export default {
+  props: ['display'],
+  data() {
+    return {
+      isLoading: 0,
+      username: '',
+      password: '',
+
+      // input text state
+      username_class: '',
+      password_class: '',
+      message: '',
+      message_color: 'bg-red-400',
+      message_show: false,
+
+      // label
+      spinner_computed: '',
+      submit_label: 'Submit'
+    }
+  },
+  methods: {
+    checkIntegrity() {
+      if(this.username == '' || this.password == '') 
+        this.message = "field is empty!";
+      else
+        return 0;
+
+      this.message_color = "bg-red-400";
+      this.message_show = true;
+      return 1;
+    },
+    convertBase64() {
+      var rawStr = this.username + ':' + this.password + ':' + "user"
+      return btoa(rawStr)
+    },
+    postInput(dataStr) {
+      // change login to loading icon
+      this.spinner_computed = "pi pi-spin pi-spinner";
+
+      // get backend url
+      let url = import.meta.env.VITE_BACKEND_URL
+
+      // fetch api
+      axios.post(url + "/v1/api/auth/register", {
+        data: dataStr
+      })
+      .then(resp => {
+        if(!this.processResponse(resp.data)) {
+          this.changeButton();
+        }
+        this.clearForm();
+        this.$emit('hide')
+      })
+      .catch(function(err) {
+        console.log(err)
+      });
+    },
+    changeButton() {
+      this.message = 'Register Success!';
+      this.message_show = true;
+      this.spinner_computed = '';
+      this.submit_label = 'Register'
+    },
+    processResponse(data) {
+      if(data["status_type"] == 1) { // user input error
+        this.message = "User input error"
+        this.username_class = 'p-invalid'
+        this.spinner_computed = ''
+        this.message_show = true
+        return 1
+      }else if(data["status_type"] == 2) { // internal error
+        console.log("THERE IS AN INTERNAL ERROR")
+        return 1
+      }else {
+        return 0
+      }
+    },
+    onSubmit() {
+      // check user input
+      if(this.checkIntegrity()) {
+        return
+      }
+
+      // convert to base64
+      var b64Str = this.convertBase64();
+
+      // fetch data
+      this.postInput(b64Str)
+    },
+    clearForm() {
+      this.username = ''
+      this.password = ''
+      this.message_show = ''
+    }
+  }
+}
+</script>

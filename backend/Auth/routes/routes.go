@@ -39,6 +39,11 @@ type LoginResponse struct {
     RefreshToken string `json:"refresh_token"`
 }
 
+type RegisterResponse struct {
+    StatusType int `json:"status_type"`
+    StatusMessage string `json:"status_message"`
+}
+
 func createLoginResponse(
     status_type int, 
     status_message string, 
@@ -56,6 +61,15 @@ func createLoginResponse(
     lr.RefreshToken = refresh_token
 
     return lr
+}
+
+func createRegisterResponse(status_type int, status_message string) (*RegisterResponse){
+    // 0 success, 1 frontend error, 2 internal error
+    var rr *RegisterResponse = new(RegisterResponse)
+
+    rr.StatusType = status_type
+    rr.StatusMessage = status_message
+    return rr
 }
 
 func processBase64Data(dataStr string) (*models.User, error) {
@@ -209,6 +223,11 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterUser(w http.ResponseWriter, r *http.Request){ 
+    // change haeder
+    w.Header().Set("Content-Type", "application/json")
+    log.Default().Println(w.Header().Get("Access-Control-Allow-Origin"))
+
+    // check if authorized
     if r.Header.Get("Authorized") != "1" {
         err := libs.CreateErrorMessage("Error: You are not authorized")
         json.NewEncoder(w).Encode(err)
@@ -218,7 +237,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request){
     // db conn
     db, connErr := database.GetDatabaseConnection()
     if connErr != nil {
-        err := libs.CreateErrorMessage("Error: Unable to connect to the database")
+        err := createRegisterResponse(2, "Unable to connect to the database")
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -229,7 +248,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request){
     // get base64 data
     jsonErr := json.NewDecoder(r.Body).Decode(&data)
     if jsonErr != nil {
-        err := libs.CreateErrorMessage("Error: Decoding the data")
+        err := createRegisterResponse(2, "Cannot decode the data")
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -237,8 +256,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request){
     // process base64 data
     newUser, processErr := processBase64Data(data.DataStr)
     if processErr != nil {
-        log.Default().Println("Error: Unable to process base64 data")
-        err := libs.CreateErrorMessage("Error: Invalid input")
+        err := createRegisterResponse(1, "Invalid user input")
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -247,17 +265,17 @@ func RegisterUser(w http.ResponseWriter, r *http.Request){
     var pwdErr error
     newUser.HashPassword, pwdErr = GetHashPassword(newUser.HashPassword)
     if pwdErr != nil {
+        err := createRegisterResponse(1, "Invalid user input")
         log.Default().Println("Error in password hashing")
-        err := libs.CreateErrorMessage("Error: Invalid Input")
+        //err := libs.CreateErrorMessage("Error: Invalid Input")
         json.NewEncoder(w).Encode(err)
         return
     }
 
     // insert user
     db.Create(&newUser)
-    w.Header().Set("Content-Type", "application/json")
     log.Default().Println("User creation complete")
-    succ := libs.CreateSuccessMessage("New user has been created!")
+    succ := createRegisterResponse(0, "Register success")
     json.NewEncoder(w).Encode(succ)
     return
 }
