@@ -18,7 +18,12 @@ const store = createStore({
   state() {
     return {
       username: 'guest',
-      isAuthenticated: false
+      isAuthenticated: false,
+      newData: {
+        product_name: '',
+        product_value: 0,
+        product_description: ''
+      }
     }
   },
   getters: {
@@ -27,6 +32,9 @@ const store = createStore({
     },
     getUsername: state => {
       return state.username
+    },
+    getData: state => {
+      return state.newData
     }
   },
   mutations: {
@@ -35,6 +43,9 @@ const store = createStore({
     },
     changeUsername(state, username) {
       state.username = username
+    },
+    setNewData(state, data) {
+      state.newData = data
     }
   }
 });

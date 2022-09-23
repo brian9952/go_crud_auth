@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"main/database"
+	"main/libs"
 	l "main/libs"
 	"main/models"
 	"net/http"
@@ -65,7 +66,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
     // db connection
     db, connErr := database.GetDatabaseConnection()
     if connErr != nil {
-        err := l.CreateErrorMessage("Unable to connect to the database")
+        err := l.CreateAddProductMessage(2, "Internal error, please contact administrator", -1)
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -73,15 +74,19 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
     // get json data
     jsonErr := json.NewDecoder(r.Body).Decode(&newProduct)
     if jsonErr != nil {
-        err := l.CreateErrorMessage("Error getting the data")
+        err := l.CreateAddProductMessage(1, "User input error", -1)
         json.NewEncoder(w).Encode(err)
         return
     }
 
-    // insert product
-    db.Create(&newProduct)
+    // insert database
+    if result := db.Create(&newProduct); result.Error != nil {
+        err := l.CreateAddProductMessage(2, "Internal error, please contact administrator", -1)
+        json.NewEncoder(w).Encode(err)
+        return
+    }
 
-    json.NewEncoder(w).Encode(l.CreateSuccessMessage("Success inserting the data"))
+    json.NewEncoder(w).Encode(libs.CreateAddProductMessage(0, "Success inserting the data", newProduct.ProductId))
 }
 
 func printRawData(inp *io.ReadCloser) string {

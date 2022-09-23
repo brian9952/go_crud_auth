@@ -3,4 +3,3 @@ http POST http://127.0.0.1:8081/v1/api/product/create_product \
     product_name="Watch" \
     product_value:=2050 \
     product_description="A fancy watch"
-

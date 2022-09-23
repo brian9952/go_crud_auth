@@ -81,8 +81,8 @@ export default {
           if(!this.processResponse(resp.data)){
             this.changeButton()
             this.insertUserData(resp.data)
+            this.clearForm();
           }
-          this.clearForm();
         })
         .catch(function(err) {
           console.log(err)

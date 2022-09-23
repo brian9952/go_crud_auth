@@ -10,8 +10,17 @@ var (
 )
 
 type Status struct {
-    StatusType int `json:"status_type"`// -1 error, 0 warning, 1 success
+    StatusType int `json:"status_type"`
     StatusMessage string `json:"status_message"`
+    ProductId int `json:"product_id"`
+}
+
+func CreateAddProductMessage(status_type int, status_message string, product_id int) *Status { // 0 success, 1 frontend error, 2 internal error
+    var s *Status = new(Status)
+    s.StatusType = status_type
+    s.StatusMessage = status_message
+    s.ProductId = product_id
+    return s
 }
 
 func CreateErrorMessage(message string) *Status {

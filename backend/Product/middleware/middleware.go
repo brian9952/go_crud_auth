@@ -133,7 +133,8 @@ func IsAuthorizedUser(handler http.HandlerFunc) http.HandlerFunc {
             return
         }
 
-        userTokenStr := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
+        tokenStr := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
+        userTokenStr := strings.Split(tokenStr, ";")[0]
 
         if userTokenStr == "" {
             err = libs.CreateErrorMessage("Error: Token not Found")

@@ -51,7 +51,15 @@ export default {
         products: null,
         errorMessage: null,
         isVisible: false
-        }
+      }
+    },
+    watch: {
+      '$store.state.newData': function() {
+        let newData = this.$store.state.newData
+        newData["num"] = Object.keys(this.products).length + 1;
+        this.products.push(newData)
+        console.log(this.products)
+      }
     },
     computed :{
       checkAuth() {
@@ -78,7 +86,6 @@ export default {
 
         { immediate: true }
       )
-
     },
     methods: {
       fetchData() {
@@ -104,6 +111,11 @@ export default {
       // dialog interaction
       getChildInterface(childInterface) {
         this.$options.childInterface = childInterface;
+      },
+      Product(product_name, product_value, product_description) {
+        this.products.product_name = product_name
+        this.products.product_value = product_value
+        this.products.product_description = product_description
       },
       
       // interface communcation
