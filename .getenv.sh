@@ -1,8 +1,8 @@
 # server profile
-export GATEWAY_URL=http://107.102.183.168:8081
-export AUTH_URL=http://107.102.183.168:8082
-export PRODUCT_URL=http://107.102.183.168:8083
-export CLIENT_URL=http://107.102.183.168:5173
+export GATEWAY_URL=http://127.0.0.1:8081
+export AUTH_URL=http://127.0.0.1:8082
+export PRODUCT_URL=http://127.0.0.1:8083
+export CLIENT_URL=http://127.0.0.1:5173
 
 # db profile
 export DB_USER=brian

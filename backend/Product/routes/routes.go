@@ -11,12 +11,13 @@ import (
 	l "main/libs"
 	"main/models"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
 
-type idProduct struct {
-    Id int `json:"product_id"`
+type IdProduct struct {
+    Id int `json:"product_id" binding:"required"`
 }
 
 type products struct {
@@ -70,6 +71,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
         json.NewEncoder(w).Encode(err)
         return
     }
+
 
     // get json data
     jsonErr := json.NewDecoder(r.Body).Decode(&newProduct)
@@ -139,34 +141,34 @@ func EditProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteProduct(w http.ResponseWriter, r *http.Request) {
-    var Id *idProduct
+    //var jsonData *IdProduct
+    // get params
+    params := mux.Vars(r)
+    product_id := params["id"]
 
     // db connection
     db, connErr := database.GetDatabaseConnection()
     if connErr != nil {
-        err := l.CreateErrorMessage("Unable to connect to the database")
+        err := l.CreateDeleteProductMessage(2, "Unable to connect to the database", -1)
         json.NewEncoder(w).Encode(err)
         return
     }
 
-    // get json data
-    jsonErr := json.NewDecoder(r.Body).Decode(&Id)
-    if jsonErr != nil {
-        err := l.CreateErrorMessage("Error getting the data")
-        json.NewEncoder(w).Encode(err)
-        return
-    }
+    // debugging
+    b_str, _ := io.ReadAll(r.Body)
+    log.Default().Println(string(b_str))
 
     // delete product
-    result := db.Delete(&models.Product{}, Id.Id)
+    result := db.Delete(&models.Product{}, product_id)
     if result.Error != nil {
-        err := l.CreateErrorMessage("Error deleting the data")
+        err := l.CreateDeleteProductMessage(1, "Error deleting the data", -1)
         json.NewEncoder(w).Encode(err)
         return
     }
 
     // success message
-    success := l.CreateSuccessMessage("Success deleting the data")
+    product_id_int, _ := strconv.Atoi(product_id)
+    success := l.CreateDeleteProductMessage(0, "Success deleting the data", product_id_int)
     json.NewEncoder(w).Encode(success)
     return
 }

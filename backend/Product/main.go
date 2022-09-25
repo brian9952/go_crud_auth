@@ -34,7 +34,7 @@ func createRouters() *mux.Router {
                 ),
             )).Methods("POST")
 
-    router.HandleFunc("/delete_product",
+    router.HandleFunc("/delete/{id:[0-9]+}",
         middleware.Logging(
             middleware.IsAuthorizedAPI(
                 middleware.IsAuthorizedUser(

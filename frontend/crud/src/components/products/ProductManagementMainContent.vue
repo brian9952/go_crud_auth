@@ -30,17 +30,27 @@ import axios from 'axios';
   </div>
 
   <!-- dialog -->
-  <ProductDialog :display="isVisible" @hide="isVisible = false" @closeDialog="isVisible = false"  @interface="getChildInterface">
+  <ProductDialog :display="showIsVisible" @hide="showIsVisible = false" @closeDialog="showIsVisible = false"  @interface="getChildInterface">
   </ProductDialog>
+
+  <!-- delete dialog -->
+  <DeleteDialog :product="delProductId" :display="deleteIsVisible" @hide="deleteIsVisible = false" @delProd="deleteRow" />
+
+  <!-- edit dialog -->
+  <EditDialog :product="editProductId" :display="editIsVisible" @hide="editIsVisible = false" />
 
 </template>
 
 <script>
 import ProductDialog from "./dialogs/ShowProductDialog.vue"
+import DeleteDialog from "./dialogs/DeleteProductDialog.vue"
+import EditDialog from "./dialogs/EditProductDialog.vue"
 
 export default {
     components: {
-      ProductDialog
+      ProductDialog,
+      DeleteDialog,
+      EditDialog
     },
     childInterface: {
       fetchProduct: () => {}
@@ -50,7 +60,11 @@ export default {
         columns: null,
         products: null,
         errorMessage: null,
-        isVisible: false
+        showIsVisible: false,
+        deleteIsVisible: false,
+        editIsVisible: false,
+        delProductId: -1,
+        editProductId: -1
       }
     },
     watch: {
@@ -107,6 +121,16 @@ export default {
       showProduct(product_id) {
         console.log("Product show = " + product_id);
       },
+      deleteProduct(product_id) {
+        this.delProduct = product_id
+        this.deleteIsVisible = true
+      },
+      deleteRow(product_id) {
+        // remove table
+        this.products = this.products.filter(function(product) {
+          return product.product_id !== product_id
+        });
+      },
 
       // dialog interaction
       getChildInterface(childInterface) {
@@ -121,14 +145,18 @@ export default {
       // interface communcation
       // show product
       fetchProduct(productId) {
-        if(this.isVisible == false) {
-          this.isVisible = true;
+        if(this.showIsVisible == false) {
+          this.showIsVisible = true;
         }
         this.$options.childInterface.fetchProduct(productId);
       },
 
       // edit product
       editProduct(productId) {
+        this.editProductId = productId
+        if(this.editIsVisible == false) {
+          this.editIsVisible = true;
+        }
 
       }
     }

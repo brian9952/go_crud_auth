@@ -107,9 +107,13 @@ export default {
       // fetch api
       axios.post(url + "/v1/api/product/create_product", data)
       .then(resp => {
+        console.log(resp.data)
         if(resp.data["status_type"] == 0) {
           // close dialog
           this.$emit('hide')
+
+          // get created product_id
+          data["product_id"] = resp.data["product_id"]
 
           // send data to vuex state
           this.$store.commit('setNewData', data)

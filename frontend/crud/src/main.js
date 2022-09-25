@@ -20,6 +20,7 @@ const store = createStore({
       username: 'guest',
       isAuthenticated: false,
       newData: {
+        product_id: -1,
         product_name: '',
         product_value: 0,
         product_description: ''
