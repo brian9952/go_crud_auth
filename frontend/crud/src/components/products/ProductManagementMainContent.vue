@@ -34,10 +34,10 @@ import axios from 'axios';
   </ProductDialog>
 
   <!-- delete dialog -->
-  <DeleteDialog :product="delProductId" :display="deleteIsVisible" @hide="deleteIsVisible = false" @delProd="deleteRow" />
+  <DeleteDialog :product="delProductId" :display="deleteIsVisible" @hide="deleteIsVisible = false" @delProd="deleteRow" @closeDialog="deleteIsVisible = false" />
 
   <!-- edit dialog -->
-  <EditDialog :product="editProductId" :display="editIsVisible" @hide="editIsVisible = false" />
+  <EditDialog :product="editProductId" :display="editIsVisible" @hide="editIsVisible = false" @closeDialog="editIsVisible = false" />
 
 </template>
 
@@ -72,7 +72,19 @@ export default {
         let newData = this.$store.state.newData
         newData["num"] = Object.keys(this.products).length + 1;
         this.products.push(newData)
-        console.log(this.products)
+      },
+      '$store.state.editedData': function() {
+        // search index
+        let editedData = this.$store.state.editedData
+        var idx = this.products.findIndex(function(item, i) {
+            return item.product_id === editedData.product_id
+        })
+
+        // change data on index 
+        this.products[idx].product_name = editedData.product_name
+        this.products[idx].product_value = editedData.product_value
+        this.products[idx].product_description = editedData.product_description
+
       }
     },
     computed :{
@@ -110,7 +122,6 @@ export default {
             for (var i = 0; i < Object.keys(resp.data).length; i++) {
               resp.data[i].num = i + 1;
             }
-            console.log(resp.data);
             // set data
             this.products = resp.data;
           })
@@ -118,18 +129,22 @@ export default {
             console.log(error.toJSON());
           })
       },
-      showProduct(product_id) {
-        console.log("Product show = " + product_id);
-      },
       deleteProduct(product_id) {
-        this.delProduct = product_id
-        this.deleteIsVisible = true
+        this.delProductId = product_id
+        if(this.deleteIsVisible == false) {
+          this.deleteIsVisible = true
+        }
       },
       deleteRow(product_id) {
         // remove table
         this.products = this.products.filter(function(product) {
           return product.product_id !== product_id
         });
+
+        // update number
+        for(var i = 0; i < Object.keys(this.products).length; i++) {
+          this.products[i].num = i + 1;
+        }
       },
 
       // dialog interaction

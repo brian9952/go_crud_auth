@@ -5,7 +5,7 @@ import InputText from "/node_modules/primevue/inputtext"
 </script>
 
 <template>
-  <Dialog v-model:visible="display" v-bind:model="true">
+  <Dialog v-model:visible="display" v-bind:modal="true">
     <div class="flex flex-column mx-8">
       <h2 class="flex">Add Product</h2>
       <!-- message -->
@@ -41,8 +41,7 @@ export default {
     'display'
   ],
   emits: [
-    'closeDialog',
-    'hide'
+    'closeDialog'
   ],
   data() {
     return {
@@ -110,7 +109,10 @@ export default {
         console.log(resp.data)
         if(resp.data["status_type"] == 0) {
           // close dialog
-          this.$emit('hide')
+          this.$emit('closeDialog')
+
+          // clear input
+          this.clearInputs()
 
           // get created product_id
           data["product_id"] = resp.data["product_id"]
@@ -123,6 +125,11 @@ export default {
         console.log(err)
       });
 
+    },
+    clearInputs() {
+      this.product_name = ''
+      this.product_value = -1
+      this.product_description = ''
     },
     onSubmit() {
       if(!this.checkIntegrity()){

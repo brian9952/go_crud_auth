@@ -38,11 +38,9 @@ export default {
   },
   methods: {
     addProduct() {
-      if(this.add_product_visible == true) {
-        this.add_product_visible = false
-        return
+      if(this.add_product_visible == false) {
+        this.add_product_visible = true
       }
-      this.add_product_visible = true
     }
   }
 }

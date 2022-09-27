@@ -108,7 +108,7 @@ func EditProduct(w http.ResponseWriter, r *http.Request) {
     // db connection
     db, connErr := database.GetDatabaseConnection()
     if connErr != nil {
-        err := l.CreateErrorMessage("Unable to connect to the database")
+        err := l.CreateEditProductMessage(2, "Unable to connect to the database", -1)
         json.NewEncoder(w).Encode(err)
         return
     }
@@ -116,10 +116,12 @@ func EditProduct(w http.ResponseWriter, r *http.Request) {
     // get json data
     jsonErr := json.NewDecoder(r.Body).Decode(&editedProduct)
     if jsonErr != nil {
-        err := l.CreateErrorMessage("Error getting the data")
+        err := l.CreateEditProductMessage(1, "Error when decoding user input", -1)
         json.NewEncoder(w).Encode(err)
         return
     }
+    
+    log.Default().Println(editedProduct.ProductId)
 
     // update
     result := db.Model(&editedProduct).Where("product_id = ?", editedProduct.ProductId).Updates(
@@ -130,12 +132,12 @@ func EditProduct(w http.ResponseWriter, r *http.Request) {
         })
 
     if result.Error != nil {
-        err := l.CreateErrorMessage("Error occured while updateing query")
+        err := l.CreateEditProductMessage(2, "There is no result on database", -1)
         json.NewEncoder(w).Encode(err)
         return 
     }
 
-    success := l.CreateSuccessMessage("Successfully updating the data")
+    success := l.CreateEditProductMessage(0, "Edit product success", editedProduct.ProductId)
     json.NewEncoder(w).Encode(success)
     return
 }

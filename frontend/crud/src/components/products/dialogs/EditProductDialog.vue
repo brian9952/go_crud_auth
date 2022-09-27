@@ -27,7 +27,7 @@ import InputText from "/node_modules/primevue/inputtext"
       <!-- buttons -->
       <div class="flex justify-content-center flex-wrap gap-4 mb-5">
         <Button class="flex align-items-center p-button-primary" label="Edit" @click="onEdit()" />
-        <Button class="flex align-items-center p-button-primary" label="Cancel" @click="$emit('hide')" />
+        <Button class="flex align-items-center p-button-secondary" label="Cancel" @click="$emit('hide')" />
       </div>
 
     </div>
@@ -41,6 +41,9 @@ export default {
   props: [
     'display',
     'product'
+  ],
+  emits: [
+    'closeDialog'
   ],
   data() {
     return {
@@ -63,6 +66,7 @@ export default {
       axios.get(url + "/v1/api/product/show/" + newId)
         .then(resp => {
           if(resp.data["product_id"] != -1) {
+            this.product_id = resp.data["product_id"]
             this.product_name = resp.data["product_name"]
             this.product_value = resp.data["product_value"]
             this.product_description = resp.data["product_description"]
@@ -104,16 +108,23 @@ export default {
     },
     onEdit() {
 
-      if(checkIntegrity()) {
+      if(this.checkIntegrity()) {
         let url = import.meta.env.VITE_BACKEND_URL
         let data = {
           product_id: this.product_id,
           product_name: this.product_name,
-          product_value: this.product_value,
+          product_value: parseInt(this.product_value),
           product_description: this.product_description
         }
+
         axios.post(url + "/v1/api/product/edit_product", data)
           .then(resp => {
+            console.log(resp.data)
+            // change state
+            if(resp.data["status_type"] == 0) {
+              this.$store.commit('setEditedData', data)
+              this.$emit('closeDialog')
+            }
 
           })
           .catch(function(error) {

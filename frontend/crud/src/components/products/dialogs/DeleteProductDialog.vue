@@ -9,8 +9,8 @@ import Button from "/node_modules/primevue/button"
     <h3>Are you sure ?</h3>
   </div>
   <div class="flex align-items-center justify-content-center gap-3 mb-4">
-    <Button class="p-button-success" label="Yes" @click="deleteProduct()"/>
-    <Button class="p-button-danger" label="Cancel" @click="$emit('hide')" />
+    <Button class="p-button-success" label="Yes" @click="deleteProduct"/>
+    <Button class="p-button-danger" label="Cancel" @click="$emit('closeDialog')" />
   </div>
 </Dialog>
 </template>
@@ -25,7 +25,7 @@ export default {
     ],
     emits: [
       'delProd',
-      'hide'
+      'closeDialog'
     ],
     methods: {
       deleteProduct() {
@@ -35,7 +35,7 @@ export default {
           .then(resp => {
             if(resp.data["status_type"] == 0){
               this.$emit('delProd', this.product)
-              this.$emit('hide')
+              this.$emit('closeDialog')
             }
           })
           .catch(function(error) {

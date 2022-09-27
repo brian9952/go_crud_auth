@@ -31,6 +31,14 @@ func CreateDeleteProductMessage(status_type int, status_message string, product_
     return s
 }
 
+func CreateEditProductMessage(status_type int, status_message string, product_id int) *Status {
+    var s *Status = new(Status)
+    s.StatusType = status_type
+    s.StatusMessage = status_message
+    s.ProductId = product_id
+    return s
+}
+
 func CreateErrorMessage(message string) *Status {
     var s *Status = new(Status)
     s.StatusType = -1

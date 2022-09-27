@@ -24,6 +24,12 @@ const store = createStore({
         product_name: '',
         product_value: 0,
         product_description: ''
+      },
+      editedData: {
+        product_id: -1,
+        product_name: '',
+        product_value: 0,
+        product_description: ''
       }
     }
   },
@@ -47,6 +53,9 @@ const store = createStore({
     },
     setNewData(state, data) {
       state.newData = data
+    },
+    setEditedData(state, data) {
+      state.editedData = data
     }
   }
 });
