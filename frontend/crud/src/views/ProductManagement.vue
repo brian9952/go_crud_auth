@@ -47,7 +47,6 @@ export default {
         // fetch data
         axios.get(url + "/v1/api/auth/refresh_token")
           .then(resp => {
-            console.log(resp.data.status_type)
             if(resp.data.status_type == 0) {
               this.$store.state.isAuthenticated = true
               //this.$store.commit('toggleAuthenticated', true)

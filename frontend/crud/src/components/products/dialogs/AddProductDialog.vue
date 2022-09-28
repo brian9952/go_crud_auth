@@ -48,7 +48,7 @@ export default {
       // text input
       isLoading: 0,
       product_name: '',
-      product_value: -1,
+      product_value: '',
       product_description: '',
 
       // text input class
@@ -106,7 +106,6 @@ export default {
       // fetch api
       axios.post(url + "/v1/api/product/create_product", data)
       .then(resp => {
-        console.log(resp.data)
         if(resp.data["status_type"] == 0) {
           // close dialog
           this.$emit('closeDialog')
@@ -128,7 +127,7 @@ export default {
     },
     clearInputs() {
       this.product_name = ''
-      this.product_value = -1
+      this.product_value = ''
       this.product_description = ''
     },
     onSubmit() {

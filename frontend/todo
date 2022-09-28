@@ -1,13 +1,3 @@
 frontend:
-  - Create edit feature
-    [1]. create editProductFunction on ProductManagementMainContent
-    [2]. create EditProductDialog.vue
-    [3]. add product_id props and watchers
-    [4]. fetch show product by id
-    [5]. fill input with fetched data
-    [6]. user input (submit / cancel)
-    [7]. post data axios
-
-  - todo:
-    fix edit product backend
-    fix frontend edit response after posting
+  - Bugs:
+    

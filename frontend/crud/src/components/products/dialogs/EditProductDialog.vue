@@ -27,7 +27,7 @@ import InputText from "/node_modules/primevue/inputtext"
       <!-- buttons -->
       <div class="flex justify-content-center flex-wrap gap-4 mb-5">
         <Button class="flex align-items-center p-button-primary" label="Edit" @click="onEdit()" />
-        <Button class="flex align-items-center p-button-secondary" label="Cancel" @click="$emit('hide')" />
+        <Button class="flex align-items-center p-button-secondary" label="Cancel" @click="$emit('closeDialog')" />
       </div>
 
     </div>
@@ -53,7 +53,7 @@ export default {
       product_id: -1,
       product_name: '',
       product_name_class: '',
-      product_value: -1,
+      product_value: '',
       product_value_class: '',
       product_description: '',
       product_description_class: ''
@@ -79,8 +79,9 @@ export default {
   },
   methods: {
     checkIntegrity() {
-      if(this.product_name == '' || this.product_value == -1 || this.product_description == '') {
+      if(this.product_name == '' || this.product_value == '' || this.product_description == '') {
         this.message = 'required field is empty!'
+        this.message_show = true
       }else {
         return 1
       }
@@ -119,11 +120,11 @@ export default {
 
         axios.post(url + "/v1/api/product/edit_product", data)
           .then(resp => {
-            console.log(resp.data)
             // change state
             if(resp.data["status_type"] == 0) {
               this.$store.commit('setEditedData', data)
               this.$emit('closeDialog')
+              this.clearForm()
             }
 
           })
@@ -132,6 +133,15 @@ export default {
           })
       }
 
+    },
+    clearForm() {
+      this.product_name = ''
+      this.product_name_class = ''
+      this.product_value = ''
+      this.product_value_class = ''
+      this.product_description = ''
+      this.product_description_class = ''
+      this.message_show = false
     }
   }
 }
