@@ -15,6 +15,7 @@ type Routers struct {
     mainRouter *mux.Router
     authRouter *mux.Router
     productRouter *mux.Router
+    websocketRouter *mux.Router
 }
 
 func (r *Routers) createAuthRouter() {
@@ -44,6 +45,11 @@ func (r *Routers) createProductRouter() {
     // r.productRouter.HandleFunc("/show_products", middleware.Logging(proxies.ProductHandler))
 }
 
+func (r *Routers) createWebsocketRouter() {
+    r.websocketRouter = r.mainRouter.PathPrefix("/v1/ws/").Subrouter()
+    r.websocketRouter.PathPrefix("/").HandlerFunc(middleware.Logging(proxies.WebsocketHandler))
+}
+
 func (r *Routers) createMainRouter() {
     r.mainRouter = mux.NewRouter()
 }
@@ -53,6 +59,7 @@ func main() {
     router.createMainRouter()
     router.createAuthRouter()
     router.createProductRouter()
+    router.createWebsocketRouter()
 
     log.Default().Println("Service started at " + os.Getenv("GATEWAY_URL"))
 

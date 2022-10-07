@@ -3,6 +3,7 @@ export GATEWAY_URL=http://107.102.183.168:8081
 export AUTH_URL=http://107.102.183.168:8082
 export PRODUCT_URL=http://107.102.183.168:8083
 export CLIENT_URL=http://107.102.183.168:5173
+export WEBSOCKET_URL=ws://107.102.183.168:9002
 
 # db profile
 export DB_USER=brian

@@ -24,6 +24,10 @@ func addUrl(u *url.URL, r *http.Request) {
     r.Host = u.Host
 }
 
+func httpToWs(url *string) {
+  
+}
+
 func generateToken(key []byte, url_from string, url_to string) (string, error) {
 
     token := jwt.New(jwt.SigningMethodHS256)
@@ -136,6 +140,24 @@ func ProductHandler(w http.ResponseWriter, r *http.Request) {
     proxy := httputil.ReverseProxy{Director: func(r *http.Request){
         addUrl(url, r)
         r.Header.Add("API-Token", token)
+    }}
+    proxy.ServeHTTP(w, r)
+}
+
+func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
+    // split url string
+    rawUrl := r.URL.Path
+    path := sliceURL(rawUrl, "ws/")
+
+    // append string
+    url_str := os.Getenv("WEBSOCKET_URL") + path
+    url, err := url.Parse(url_str)
+    if err != nil {
+        log.Default().Panic("Error when parsing")
+    }
+
+    proxy := httputil.ReverseProxy{Director: func(r *http.Request) {
+        addUrl(url, r)
     }}
     proxy.ServeHTTP(w, r)
 }
